@@ -87,10 +87,13 @@ class StanfordMigrateUltimateCronForm extends FormBase {
       '#title' => $this->t('Missing Cron Jobs'),
       '#items' => $missing_migration_jobs,
     ];
-    $form['submit'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Create missing cron jobs'),
-    ];
+
+    if(!empty($missing_migration_jobs)) {
+      $form['submit'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Create missing cron jobs'),
+      ];
+    }
     return $form;
   }
 
