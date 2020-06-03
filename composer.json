@@ -14,25 +14,19 @@
         }
     ],
     "require": {
-        "drupal/config_pages": "~2.7",
         "drupal/migrate_file": "^1.1",
         "drupal/migrate_plus": "^5.0",
         "drupal/migrate_tools": "^5.0",
         "drupal/ultimate_cron": "^2.0@alpha"
     },
     "extra": {
-        "enable-patching": true,
-        "composer-exit-on-patch-failure": true,
         "patches": {
-            "drupal/migrate_tools": {
-                "https://www.drupal.org/project/migrate_tools/issues/2894708":
-                "https://www.drupal.org/files/issues/2019-02-28/disabled-migrations-list-2894708-17.patch"
-            },
             "drupal/migrate_plus": {
-                "https://www.drupal.org/project/migrate_plus/issues/2837684":
-                "https://www.drupal.org/files/issues/2837684-8-migrate-plus-xml-return-as-xml.patch",
-                "https://www.drupal.org/project/migrate_plus/issues/3050058":
-                "https://www.drupal.org/files/issues/2019-05-17/migrate_plus-no_selector-3050058-3.patch"
+                "https://www.drupal.org/project/migrate_plus/issues/2837684": "https://www.drupal.org/files/issues/2837684-8-migrate-plus-xml-return-as-xml.patch",
+                "https://www.drupal.org/project/migrate_plus/issues/3050058": "https://www.drupal.org/files/issues/2019-05-17/migrate_plus-no_selector-3050058-3.patch"
+            },
+            "drupal/migrate_tools": {
+                "https://www.drupal.org/project/migrate_tools/issues/2894708": "https://www.drupal.org/files/issues/2019-02-28/disabled-migrations-list-2894708-17.patch"
             }
         }
     }

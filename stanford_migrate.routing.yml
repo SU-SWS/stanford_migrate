@@ -1,9 +1,17 @@
 stanford_migrate.list:
-  path: '/import'
+  path: '/admin/config/importers'
   defaults:
     _form: '\Drupal\stanford_migrate\Form\StanfordMigrateImportForm'
-    _title: 'Migrations'
+    _title: 'Importers'
   options:
     _admin_route: TRUE
   requirements:
     _custom_access: '\Drupal\stanford_migrate\Form\StanfordMigrateImportForm::access'
+
+stanford_migrate.ultimate_cron:
+  path: '/admin/config/importers/ultimate-cron'
+  defaults:
+    _form: '\Drupal\stanford_migrate\Form\StanfordMigrateUltimateCronForm'
+    _title: 'Importer Cron Jobs'
+  requirements:
+    _permission: 'administer migrations'

@@ -4,7 +4,3 @@ services:
     arguments: ['@entity_type.manager']
     tags:
       - { name: event_subscriber }
-  stanford_migrate.overrider:
-    class: \Drupal\stanford_migrate\Overrides\MigrationOverrides
-    tags:
-      - {name: config.factory.override, priority: 5}

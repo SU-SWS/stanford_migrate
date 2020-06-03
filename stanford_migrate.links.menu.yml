@@ -1,0 +1,9 @@
+stanford_migrate.list:
+  title: 'Importers'
+  description: 'List of importers and execution form'
+  parent: system.admin_config
+  route_name: stanford_migrate.list
+stanford_migrate.ultimate_cron:
+  title: 'Migration Cron Jobs'
+  parent: stanford_migrate.list
+  route_name: stanford_migrate.ultimate_cron
