@@ -36,12 +36,7 @@ class StripTags extends ProcessPluginBase {
     if (!is_string($value)) {
       return '';
     }
-
-    if (!empty($this->configuration['allowed'])) {
-      return strip_tags($value, $this->configuration['allowed']);
-    }
-
-    return strip_tags($value);
+    return strip_tags($value, $this->configuration['allowed'] ?? NULL);
   }
 
 }
