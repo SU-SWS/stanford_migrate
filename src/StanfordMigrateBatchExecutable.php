@@ -67,7 +67,6 @@ class StanfordMigrateBatchExecutable extends MigrateBatchExecutable {
   protected function prepareMigrations(MigrationInterface $migration) {
     $migration->interruptMigration(MigrationInterface::RESULT_STOPPED);
     $migration->setStatus(MigrationInterface::STATUS_IDLE);
-
     foreach ($migration->getMigrationDependencies()['required'] as $dependency_id) {
       /** @var \Drupal\migrate\Plugin\MigrationInterface $dependent_migration */
       $dependent_migration = $this->migrationPluginManager->createInstance($dependency_id);
@@ -78,7 +77,7 @@ class StanfordMigrateBatchExecutable extends MigrateBatchExecutable {
   /**
    * {@inheritdoc}
    */
-  public static function batchProcessImport($migration_id, array $options, array &$context) {
+  public static function batchProcessImport($migration_id, array $options, &$context) {
     if (empty($context['sandbox'])) {
       $context['finished'] = 0;
       $context['sandbox'] = [];
@@ -94,6 +93,7 @@ class StanfordMigrateBatchExecutable extends MigrateBatchExecutable {
     $migration = \Drupal::getContainer()
       ->get('plugin.manager.migration')
       ->createInstance($migration_id);
+
     $executable = new StanfordMigrateBatchExecutable($migration, $message, $options);
 
     if (empty($context['sandbox']['total'])) {

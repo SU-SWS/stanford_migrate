@@ -52,15 +52,6 @@ function _stanford_migrate_get_time($arg = NULL) {
 }
 
 /**
- * Implements hook_migrate_process_info_alter().
- */
-function stanford_migrate_migrate_process_info_alter(array &$definitions) {
-  // Change the class we use for the subprocess functionality to cast xml
-  // objects as arrays.
-  $definitions['sub_process']['class'] = '\Drupal\stanford_migrate\Plugin\migrate\process\SubProcess';
-}
-
-/**
  * Implements hook_migrate_source_info_alter().
  */
 function stanford_migrate_migrate_source_info_alter(array &$definitions) {

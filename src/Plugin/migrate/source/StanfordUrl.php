@@ -13,21 +13,27 @@ use Drupal\migrate_plus\Plugin\migrate\source\Url;
 class StanfordUrl extends Url {
 
   /**
+   * If the request is made to get all IDs from the source.
+   *
+   * @var bool
+   */
+  protected $gettingIds = FALSE;
+
+  /**
    * Get all ids that exist in the current source.
    *
    * @return array
    *   Array of id data from the source.
    */
   public function getAllIds() {
-    $this->highWaterProperty = [
-      'name' => 'guid',
-    ];
+    $this->gettingIds = TRUE;
     $this->rewind();
     $ids = [];
     while ($this->current()) {
       $ids[] = $this->currentSourceIds;
       $this->next();
     }
+    $this->gettingIds = FALSE;
     return $ids;
   }
 
@@ -82,7 +88,8 @@ class StanfordUrl extends Url {
       // 2. Explicitly set to update.
       // 3. The row is newer than the current highwater mark.
       // 4. If no such property exists then try by checking the hash of the row.
-      if (!$row->getIdMap() || $row->needsUpdate() || $this->aboveHighwater($row) || $this->rowChanged($row)) {
+      // 5. Flag when just needing the row's IDS.
+      if (!$row->getIdMap() || $row->needsUpdate() || $this->aboveHighwater($row) || $this->rowChanged($row) || $this->gettingIds) {
         $this->currentRow = $row->freezeSource();
       }
 

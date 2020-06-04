@@ -88,7 +88,7 @@ class StanfordMigrateUltimateCronForm extends FormBase {
       '#items' => $missing_migration_jobs,
     ];
 
-    if(!empty($missing_migration_jobs)) {
+    if (!empty($missing_migration_jobs)) {
       $form['submit'] = [
         '#type' => 'submit',
         '#value' => $this->t('Create missing cron jobs'),
@@ -106,6 +106,7 @@ class StanfordMigrateUltimateCronForm extends FormBase {
         'id' => "stanford_migrate_$migration_id",
         'title' => 'Importer: ' . $label,
         'callback' => 'stanford_migrate_ultimate_cron_task',
+        'module' => 'stanford_migrate',
       ];
       $this->entityTypeManager->getStorage('ultimate_cron_job')
         ->create($values)->save();
