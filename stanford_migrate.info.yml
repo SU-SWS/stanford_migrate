@@ -1,6 +1,6 @@
 name: 'Stanford Migrate'
-type: module
 description: 'Adds more functionality to migrate and migrate plus modules'
+type: module
 core_version_requirement: ^8.8 || ^9
 package: 'Stanford'
 version: 8.x-1.0-dev
