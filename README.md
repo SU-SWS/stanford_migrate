@@ -1,7 +1,11 @@
 # [Stanford Migrate](https://github.com/SU-SWS/stanford_migrate)
 ##### Version: 8.x-1.x
 
-Maintainers: [Mike Decker](https://github.com/pookmish), [sherakama](https://github.com/sherakama)  
+[![Maintainability](https://api.codeclimate.com/v1/badges/624b3c3f2cb2dc9d87e7/maintainability)](https://codeclimate.com/github/SU-SWS/stanford_migrate/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/624b3c3f2cb2dc9d87e7/test_coverage)](https://codeclimate.com/github/SU-SWS/stanford_migrate/test_coverage)
+[![CircleCI](https://circleci.com/gh/SU-SWS/stanford_migrate.svg?style=svg)](https://circleci.com/gh/SU-SWS/stanford_migrate)
+
+Maintainers: [Mike Decker](https://github.com/pookmish), [sherakama](https://github.com/sherakama)
 
 Changelog: [Changelog.txt](CHANGELOG.txt)
 
