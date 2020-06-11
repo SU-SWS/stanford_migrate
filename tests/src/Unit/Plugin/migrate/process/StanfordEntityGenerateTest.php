@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Tests\stanford_migrate\Unit\Plulgin\migrate\process;
+namespace Drupal\Tests\stanford_migrate\Unit\Plugin\migrate\process;
 
 use Drupal\Core\DependencyInjection\Container;
 use Drupal\Core\Entity\EntityInterface;
