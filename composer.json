@@ -29,5 +29,15 @@
                 "https://www.drupal.org/project/migrate_tools/issues/2894708": "https://www.drupal.org/files/issues/2019-02-28/disabled-migrations-list-2894708-17.patch"
             }
         }
+    },
+    "autoload": {
+        "psr-4": {
+            "Drupal\\stanford_migrate\\": "./src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Drupal\\Tests\\stanford_migrate\\": "./tests/src"
+        }
     }
 }

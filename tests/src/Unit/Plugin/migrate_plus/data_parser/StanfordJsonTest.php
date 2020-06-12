@@ -12,12 +12,15 @@ use Drupal\stanford_migrate\Plugin\migrate_plus\data_parser\StanfordJson;
  */
 class StanfordJsonTest extends DataParserTestBase {
 
+  /**
+   * The current url method will return the correct url.
+   */
   public function testCurrentUrl() {
     $this->dataFetcherContent = json_encode(['foo' => ['bar']]);
 
     $configuration = [
       'data_fetcher_plugin' => 'url',
-      'urls' => ['http://localhost'],
+      'urls' => ['http://localhost', 'http://foo.bar'],
       'item_selector' => '/foo',
       'fields' => [],
     ];
