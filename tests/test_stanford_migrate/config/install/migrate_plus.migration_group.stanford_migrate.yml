@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies: {  }
+id: stanford_migrate
+label: Events
+description: 'Stanford Migrate.'
+source_type: null
+module: null
+shared_configuration: null

@@ -1,0 +1,5 @@
+name: Test Stanford Migrate
+type: module
+core_version_requirement: ^8.8 || ^9
+package: 'Testing'
+hidden: true

@@ -67,11 +67,6 @@ class EventsSubscriber implements EventSubscriberInterface {
     $source_plugin = $event->getMigration()->getSourcePlugin();
     $current_source_ids = $source_plugin->getAllIds();
 
-    // Nothing has been imported before, so there's nothing to do.
-    if (empty($current_source_ids)) {
-      return;
-    }
-
     /** @var \Drupal\migrate\Plugin\migrate\id_map\Sql $id_map */
     $id_map = $event->getMigration()->getIdMap();
 

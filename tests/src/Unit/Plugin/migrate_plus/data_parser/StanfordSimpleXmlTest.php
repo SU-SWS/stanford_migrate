@@ -26,7 +26,7 @@ class StanfordSimpleXmlTest extends DataParserTestBase {
     ];
     $plugin = StanfordSimpleXml::create(\Drupal::getContainer(), $configuration, '', []);
     $plugin->next();
-    $this->assertEquals('http://localhost', $plugin->getCurrentUrl());
+    $this->assertEquals('http://foo.bar', $plugin->getCurrentUrl());
   }
 
 }

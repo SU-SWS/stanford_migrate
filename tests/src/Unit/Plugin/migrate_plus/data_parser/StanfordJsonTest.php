@@ -26,7 +26,7 @@ class StanfordJsonTest extends DataParserTestBase {
     ];
     $plugin = StanfordJson::create(\Drupal::getContainer(), $configuration, '', []);
     $plugin->next();
-    $this->assertEquals('http://localhost', $plugin->getCurrentUrl());
+    $this->assertEquals('http://foo.bar', $plugin->getCurrentUrl());
   }
 
 }
