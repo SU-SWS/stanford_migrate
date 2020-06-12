@@ -51,6 +51,10 @@ class StanfordMigratePermissions implements ContainerInjectionInterface {
 
     // Some migrations will be run when its dependent migration is ran.
     foreach ($this->migrations as $migration) {
+      $migration_dependencies = $migration->getMigrationDependencies();
+      if (empty($migration_dependencies['required'])) {
+        continue;
+      }
       foreach ($migration->getMigrationDependencies()['required'] as $dependency) {
         unset($this->migrations[$dependency]);
       }
