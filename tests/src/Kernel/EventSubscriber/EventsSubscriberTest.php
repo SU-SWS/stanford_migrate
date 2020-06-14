@@ -2,35 +2,19 @@
 
 namespace Drupal\Tests\stanford_migrate\Kernel\EventSubscriber;
 
-use Drupal\KernelTests\KernelTestBase;
 use Drupal\migrate\MigrateExecutable;
-use Drupal\node\Entity\NodeType;
+use Drupal\Tests\stanford_migrate\Kernel\StanfordMigrateKernelTestBase;
 
-class EventsSubscriberTest extends KernelTestBase {
+class EventsSubscriberTest extends StanfordMigrateKernelTestBase {
 
-  protected static $modules = [
-    'test_stanford_migrate',
-    'stanford_migrate',
-    'migrate_plus',
-    'migrate',
-    'node',
-    'user',
-    'system',
-  ];
-
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp() {
     parent::setUp();
-    $this->installEntitySchema('user');
-    $this->installEntitySchema('node');
-    $this->installEntitySchema('migration');
-    $this->installConfig('test_stanford_migrate');
-    $this->installSchema('node', ['node_access']);
-
-    NodeType::create(['type' => 'article'])->save();
-
     \Drupal::configFactory()
       ->getEditable('migrate_plus.migration.stanford_migrate')
-      ->set('source.urls', [__DIR__ . '/test.xml'])
+      ->set('source.urls', [__DIR__ . '/../test.xml'])
       ->save();
   }
 
@@ -75,7 +59,7 @@ class EventsSubscriberTest extends KernelTestBase {
     $this->assertEqual(1, $this->getNodeCount());
     \Drupal::configFactory()
       ->getEditable('migrate_plus.migration.stanford_migrate')
-      ->set('source.urls', [__DIR__ . '/test2.xml'])
+      ->set('source.urls', [__DIR__ . '/../test2.xml'])
       ->set('source.orphan_action', 'unpublish')
       ->save();
 
@@ -91,6 +75,9 @@ class EventsSubscriberTest extends KernelTestBase {
     $this->assertCount(1, $unpublished_nodes);
   }
 
+  /**
+   * Get the migration executable.
+   */
   protected function getMigrateExecutable() {
     $manager = \Drupal::service('plugin.manager.migration');
     /** @var \Drupal\migrate\Plugin\Migration $migration */
@@ -98,6 +85,9 @@ class EventsSubscriberTest extends KernelTestBase {
     return new MigrateExecutable($migration);
   }
 
+  /**
+   * Get the number of nodes created.
+   */
   protected function getNodeCount() {
     $nodes = \Drupal::entityTypeManager()
       ->getStorage('node')
