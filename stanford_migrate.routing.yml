@@ -9,7 +9,7 @@ stanford_migrate.list:
     _custom_access: '\Drupal\stanford_migrate\Form\StanfordMigrateImportForm::access'
 
 stanford_migrate.ultimate_cron:
-  path: '/admin/config/importers/ultimate-cron'
+  path: '/admin/config/system/cron/migrate-jobs'
   defaults:
     _form: '\Drupal\stanford_migrate\Form\StanfordMigrateUltimateCronForm'
     _title: 'Importer Cron Jobs'
