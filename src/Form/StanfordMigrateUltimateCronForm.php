@@ -5,7 +5,6 @@ namespace Drupal\stanford_migrate\Form;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\migrate\Plugin\MigrationPluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
