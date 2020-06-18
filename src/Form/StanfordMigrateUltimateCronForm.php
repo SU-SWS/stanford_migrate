@@ -16,13 +16,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class StanfordMigrateUltimateCronForm extends FormBase {
 
   /**
-   * Migration plugin manager service.
-   *
-   * @var \Drupal\migrate\Plugin\MigrationPluginManager
-   */
-  protected $migrationManager;
-
-  /**
    * Entity type manager service.
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
@@ -34,7 +27,6 @@ class StanfordMigrateUltimateCronForm extends FormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('plugin.manager.migration'),
       $container->get('entity_type.manager')
     );
   }
@@ -42,13 +34,10 @@ class StanfordMigrateUltimateCronForm extends FormBase {
   /**
    * StanfordMigrateUltimateCronForm constructor.
    *
-   * @param \Drupal\migrate\Plugin\MigrationPluginManager $migration_manager
-   *   Migration plugin manager service.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   Entity type manager service.
    */
-  public function __construct(MigrationPluginManager $migration_manager, EntityTypeManagerInterface $entity_type_manager) {
-    $this->migrationManager = $migration_manager;
+  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
     $this->entityTypeManager = $entity_type_manager;
   }
 
@@ -68,7 +57,6 @@ class StanfordMigrateUltimateCronForm extends FormBase {
 
     $existing_migration_jobs = [];
     $missing_migration_jobs = [];
-
 
     $migration_group_configs = $this->configFactory->listAll('migrate_plus.migration_group.');
     foreach ($migration_group_configs as $config_name) {
