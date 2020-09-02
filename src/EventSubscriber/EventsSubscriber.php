@@ -107,10 +107,11 @@ class EventsSubscriber implements EventSubscriberInterface {
       if (!$id_exists_in_source) {
         // Find the entity id from the id map.
         $destination_ids = $id_map->lookupDestinationIds($id_map->currentSource());
+        $destination_ids = array_filter(reset($destination_ids));
 
         /** @var \Drupal\Core\Entity\ContentEntityInterface[] $entities */
         // $destination_ids should be a single item.
-        $entities = $entity_storage->loadMultiple(reset($destination_ids));
+        $entities = $entity_storage->loadMultiple($destination_ids);
 
         switch ($orphan_action) {
           case self::ORPHAN_DELETE:
