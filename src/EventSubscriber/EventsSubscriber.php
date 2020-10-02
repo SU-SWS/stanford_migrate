@@ -84,7 +84,6 @@ class EventsSubscriber implements EventSubscriberInterface {
     if (!$orphan_action) {
       return;
     }
-    var_dump(__LINE__);
 
     /** @var \Drupal\stanford_migrate\Plugin\migrate\source\StanfordUrl $source_plugin */
     $source_plugin = $event->getMigration()->getSourcePlugin();
