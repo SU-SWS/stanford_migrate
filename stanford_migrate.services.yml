@@ -1,6 +1,6 @@
 services:
   stanford_migrate.event_subscriber:
     class: Drupal\stanford_migrate\EventSubscriber\EventsSubscriber
-    arguments: ['@entity_type.manager', '@logger.factory']
+    arguments: ['@entity_type.manager', '@logger.factory', '@cache.default']
     tags:
       - { name: event_subscriber }

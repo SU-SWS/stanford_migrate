@@ -2,7 +2,9 @@
 
 namespace Drupal\stanford_migrate\EventSubscriber;
 
+use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Logger\LoggerChannelFactory;
+use Drupal\Core\State\StateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\migrate\Event\MigrateEvents;
 use Drupal\migrate\Event\MigrateImportEvent;
@@ -42,11 +44,19 @@ class EventsSubscriber implements EventSubscriberInterface {
   protected $logger;
 
   /**
+   * Default cache service.
+   *
+   * @var \Drupal\Core\Cache\CacheBackendInterface
+   */
+  protected $cache;
+
+  /**
    * Constructs a new MigrateEventsSubscriber object.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, LoggerChannelFactory $logger_factory) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, LoggerChannelFactory $logger_factory, CacheBackendInterface $cache) {
     $this->entityTypeManager = $entity_type_manager;
     $this->logger = $logger_factory->get('stanford_migrate');
+    $this->cache = $cache;
   }
 
   /**
@@ -66,10 +76,10 @@ class EventsSubscriber implements EventSubscriberInterface {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\Entity\EntityStorageException
-   * @throws \Drupal\migrate\MigrateException
    */
   public function postImport(MigrateImportEvent $event) {
     $orphan_action = $this->getOrphanAction($event->getMigration());
+
     // Migration doesn't have a orphan action, ignore it.
     if (!$orphan_action) {
       return;
@@ -119,44 +129,53 @@ class EventsSubscriber implements EventSubscriberInterface {
       // it.
       if (!$id_exists_in_source) {
         // Find the entity id from the id map.
-        $destination_ids = $id_map->lookupDestinationIds($id_map->currentSource());
-        $destination_ids = array_filter(reset($destination_ids));
+        $destination_id = $id_map->lookupDestinationIds($id_map->currentSource());
 
-        /** @var \Drupal\Core\Entity\ContentEntityInterface[] $entities */
-        // $destination_ids should be a single item.
-        $entities = $entity_storage->loadMultiple($destination_ids);
+        // $destination_id should be a single entity id.
+        while (is_array($destination_id)) {
+          $destination_id = reset($destination_id);
+        }
+
+        if (!$destination_id) {
+          continue;
+        }
+        /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
+        $entity = $entity_storage->load($destination_id);
+        if (!$entity) {
+          continue;
+        }
 
         switch ($orphan_action) {
           case self::ORPHAN_DELETE:
-            foreach ($entities as $entity) {
-              $this->logger->notice($this->t('Deleted entity since it no longer exists in the source data. Migration: @migration, Entity Type: @entity_type, Label: @label'), [
-                '@migration' => $event->getMigration()->label(),
-                '@entity_type' => $type,
-                '@label' => $entity->label(),
-              ]);
-            }
+            $this->logger->notice($this->t('Deleted entity since it no longer exists in the source data. Migration: @migration, Entity Type: @entity_type, Label: @label'), [
+              '@migration' => $event->getMigration()->label(),
+              '@entity_type' => $type,
+              '@label' => $entity->label(),
+            ]);
 
             // Delete the entity, then the record in the id map.
-            $entity_storage->delete($entities);
+            $entity->delete();
             break;
 
           case self::ORPHAN_UNPUBLISH:
-            // Unpublish the orphans.
-            foreach ($entities as $entity) {
-              if ($entity->hasField($status_key)) {
-                $entity->setNewRevision();
-                if ($entity->hasField('revision_log')) {
-                  $entity->set('revision_log', 'Unpublished content since it no longer exists in the source data');
-                }
-                $entity->set($status_key, 0)->save();
+            // Unpublish the orphan only if it is currently published.
+            if (
+              $entity->hasField($status_key) &&
+              $entity->get($status_key)->getString()
+            ) {
+              $entity->setNewRevision();
+              if ($entity->hasField('revision_log')) {
+                $entity->set('revision_log', 'Unpublished content since it no longer exists in the source data');
               }
-
-              $this->logger->notice($this->t('Unpublished entity since it no longer exists in the source data. Migration: @migration, Entity Type: @entity_type, Label: @label'), [
-                '@migration' => $event->getMigration()->label(),
-                '@entity_type' => $type,
-                '@label' => $entity->label(),
-              ]);
+              $entity->set($status_key, 0)->save();
             }
+
+            $this->logger->notice($this->t('Unpublished entity since it no longer exists in the source data. Migration: @migration, Entity Type: @entity_type, Label: @label'), [
+              '@migration' => $event->getMigration()->label(),
+              '@entity_type' => $type,
+              '@label' => $entity->label(),
+            ]);
+
             break;
         }
       }
@@ -164,6 +183,8 @@ class EventsSubscriber implements EventSubscriberInterface {
       // Move on to the next existing item.
       $id_map->next();
     }
+
+
   }
 
   /**
@@ -184,6 +205,19 @@ class EventsSubscriber implements EventSubscriberInterface {
 
       // @see \Drupal\stanford_migrate\Plugin\migrate\source\StanfordUrl::getAllIds()
       if (method_exists($migration->getSourcePlugin(), 'getAllIds')) {
+
+        $cid = 'stanford_migrate:' . $migration->id();
+        // No need to check the contents of the cache. The cache is just a
+        // temporary flag that the orphan action has recently occurred. This
+        // will prevent the unnecessary double execution.
+        if ($this->cache->get($cid)) {
+          return FALSE;
+        }
+
+        // Just set a cache that expires in 5 minutes. This will allow us to
+        // just check if the cache exists so that we don't have to run the
+        // orphan action more than 1 time.
+        $this->cache->set($cid, time(), time() + 60 + 5);
         return $source_config['orphan_action'];
       }
     }
