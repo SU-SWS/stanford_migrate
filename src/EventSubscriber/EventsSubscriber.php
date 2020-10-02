@@ -74,6 +74,7 @@ class EventsSubscriber implements EventSubscriberInterface {
     if (!$orphan_action) {
       return;
     }
+    var_dump(__LINE__);
 
     /** @var \Drupal\stanford_migrate\Plugin\migrate\source\StanfordUrl $source_plugin */
     $source_plugin = $event->getMigration()->getSourcePlugin();
@@ -129,8 +130,7 @@ class EventsSubscriber implements EventSubscriberInterface {
           case self::ORPHAN_DELETE:
             foreach ($entities as $entity) {
               $this->logger->notice($this->t('Deleted entity since it no longer exists in the source data. Migration: @migration, Entity Type: @entity_type, Label: @label'), [
-                '@migration' => $event->getMigration()
-                  ->label(),
+                '@migration' => $event->getMigration()->label(),
                 '@entity_type' => $type,
                 '@label' => $entity->label(),
               ]);
@@ -152,8 +152,7 @@ class EventsSubscriber implements EventSubscriberInterface {
               }
 
               $this->logger->notice($this->t('Unpublished entity since it no longer exists in the source data. Migration: @migration, Entity Type: @entity_type, Label: @label'), [
-                '@migration' => $event->getMigration()
-                  ->label(),
+                '@migration' => $event->getMigration()->label(),
                 '@entity_type' => $type,
                 '@label' => $entity->label(),
               ]);
