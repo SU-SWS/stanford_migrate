@@ -2,6 +2,8 @@
 
 namespace Drupal\stanford_migrate\EventSubscriber;
 
+use Drupal\Core\Logger\LoggerChannelFactory;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\migrate\Event\MigrateEvents;
 use Drupal\migrate\Event\MigrateImportEvent;
 use Drupal\migrate\Plugin\MigrationInterface;
@@ -12,6 +14,8 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
  * Class EventsSubscriber.
  */
 class EventsSubscriber implements EventSubscriberInterface {
+
+  use StringTranslationTrait;
 
   /**
    * If the migration is configured to delete orphans.
@@ -31,10 +35,18 @@ class EventsSubscriber implements EventSubscriberInterface {
   protected $entityTypeManager;
 
   /**
+   * Logger channel service.
+   *
+   * @var \Drupal\Core\Logger\LoggerChannel|\Drupal\Core\Logger\LoggerChannelInterface
+   */
+  protected $logger;
+
+  /**
    * Constructs a new MigrateEventsSubscriber object.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, LoggerChannelFactory $logger_factory) {
     $this->entityTypeManager = $entity_type_manager;
+    $this->logger = $logger_factory->get('stanford_migrate');
   }
 
   /**
@@ -115,6 +127,15 @@ class EventsSubscriber implements EventSubscriberInterface {
 
         switch ($orphan_action) {
           case self::ORPHAN_DELETE:
+            foreach ($entities as $entity) {
+              $this->logger->notice($this->t('Deleted entity since it no longer exists in the source data. Migration: @migration, Entity Type: @entity_type, Label: @label'), [
+                '@migration' => $event->getMigration()
+                  ->label(),
+                '@entity_type' => $type,
+                '@label' => $entity->label(),
+              ]);
+            }
+
             // Delete the entity, then the record in the id map.
             $entity_storage->delete($entities);
             break;
@@ -123,8 +144,19 @@ class EventsSubscriber implements EventSubscriberInterface {
             // Unpublish the orphans.
             foreach ($entities as $entity) {
               if ($entity->hasField($status_key)) {
+                $entity->setNewRevision();
+                if ($entity->hasField('revision_log')) {
+                  $entity->set('revision_log', 'Unpublished content since it no longer exists in the source data');
+                }
                 $entity->set($status_key, 0)->save();
               }
+
+              $this->logger->notice($this->t('Unpublished entity since it no longer exists in the source data. Migration: @migration, Entity Type: @entity_type, Label: @label'), [
+                '@migration' => $event->getMigration()
+                  ->label(),
+                '@entity_type' => $type,
+                '@label' => $entity->label(),
+              ]);
             }
             break;
         }
