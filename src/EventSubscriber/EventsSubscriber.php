@@ -181,8 +181,6 @@ class EventsSubscriber implements EventSubscriberInterface {
       // Move on to the next existing item.
       $id_map->next();
     }
-
-
   }
 
   /**
