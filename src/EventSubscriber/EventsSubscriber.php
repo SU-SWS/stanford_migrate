@@ -4,7 +4,6 @@ namespace Drupal\stanford_migrate\EventSubscriber;
 
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Logger\LoggerChannelFactory;
-use Drupal\Core\State\StateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\migrate\Event\MigrateEvents;
 use Drupal\migrate\Event\MigrateImportEvent;
@@ -52,6 +51,13 @@ class EventsSubscriber implements EventSubscriberInterface {
 
   /**
    * Constructs a new MigrateEventsSubscriber object.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   Entity type manager service.
+   * @param \Drupal\Core\Logger\LoggerChannelFactory $logger_factory
+   *   Logger factory service.
+   * @param \Drupal\Core\Cache\CacheBackendInterface $cache
+   *   Default cache service.
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager, LoggerChannelFactory $logger_factory, CacheBackendInterface $cache) {
     $this->entityTypeManager = $entity_type_manager;
@@ -76,6 +82,7 @@ class EventsSubscriber implements EventSubscriberInterface {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Drupal\migrate\MigrateException
    */
   public function postImport(MigrateImportEvent $event) {
     $orphan_action = $this->getOrphanAction($event->getMigration());
@@ -189,10 +196,18 @@ class EventsSubscriber implements EventSubscriberInterface {
    * @param \Drupal\migrate\Plugin\MigrationInterface $migration
    *   Migration object that finished.
    *
-   * @return bool
+   * @return bool|string
    *   Delete orphans or not.
    */
   protected function getOrphanAction(MigrationInterface $migration) {
+    $cid = 'stanford_migrate:' . $migration->id();
+    // No need to check the contents of the cache. The cache is just a
+    // temporary flag that the orphan action has recently occurred. This
+    // will prevent the unnecessary double execution.
+    if ($this->cache->get($cid)) {
+      return FALSE;
+    }
+
     $source_config = $migration->getSourceConfiguration();
 
     // The migration entity should have a `delete_orphans` setting in the
@@ -201,14 +216,6 @@ class EventsSubscriber implements EventSubscriberInterface {
 
       // @see \Drupal\stanford_migrate\Plugin\migrate\source\StanfordUrl::getAllIds()
       if (method_exists($migration->getSourcePlugin(), 'getAllIds')) {
-
-        $cid = 'stanford_migrate:' . $migration->id();
-        // No need to check the contents of the cache. The cache is just a
-        // temporary flag that the orphan action has recently occurred. This
-        // will prevent the unnecessary double execution.
-        if ($this->cache->get($cid)) {
-          return FALSE;
-        }
 
         // Just set a cache that expires in 5 minutes. This will allow us to
         // just check if the cache exists so that we don't have to run the
