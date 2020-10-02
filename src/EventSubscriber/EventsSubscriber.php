@@ -167,14 +167,13 @@ class EventsSubscriber implements EventSubscriberInterface {
                 $entity->set('revision_log', 'Unpublished content since it no longer exists in the source data');
               }
               $entity->set($status_key, 0)->save();
+
+              $this->logger->notice($this->t('Unpublished entity since it no longer exists in the source data. Migration: @migration, Entity Type: @entity_type, Label: @label'), [
+                '@migration' => $event->getMigration()->label(),
+                '@entity_type' => $type,
+                '@label' => $entity->label(),
+              ]);
             }
-
-            $this->logger->notice($this->t('Unpublished entity since it no longer exists in the source data. Migration: @migration, Entity Type: @entity_type, Label: @label'), [
-              '@migration' => $event->getMigration()->label(),
-              '@entity_type' => $type,
-              '@label' => $entity->label(),
-            ]);
-
             break;
         }
       }
