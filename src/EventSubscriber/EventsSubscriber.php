@@ -143,11 +143,16 @@ class EventsSubscriber implements EventSubscriberInterface {
         }
 
         if (!$destination_id) {
+          // Move on to the next existing item.
+          $id_map->next();
           continue;
         }
+
         /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
         $entity = $entity_storage->load($destination_id);
         if (!$entity) {
+          // Move on to the next existing item.
+          $id_map->next();
           continue;
         }
 
