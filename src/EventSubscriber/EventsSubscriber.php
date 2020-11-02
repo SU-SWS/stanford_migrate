@@ -166,6 +166,7 @@ class EventsSubscriber implements EventSubscriberInterface {
 
             // Delete the entity, then the record in the id map.
             $entity->delete();
+            $id_map->delete($id_map->currentSource());
             break;
 
           case self::ORPHAN_UNPUBLISH:
@@ -179,6 +180,7 @@ class EventsSubscriber implements EventSubscriberInterface {
                 $entity->set('revision_log', 'Unpublished content since it no longer exists in the source data');
               }
               $entity->set($status_key, 0)->save();
+              $id_map->setUpdate($id_map->currentSource());
 
               $this->logger->notice($this->t('Unpublished entity since it no longer exists in the source data. Migration: @migration, Entity Type: @entity_type, Label: @label'), [
                 '@migration' => $event->getMigration()->label(),
