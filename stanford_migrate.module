@@ -79,9 +79,9 @@ function stanford_migrate_entity_delete(EntityInterface $entity) {
   $manager = \Drupal::service('plugin.manager.migration');
   $migrations = $manager->createInstances([]);
 
-  /** @var \Drupal\migrate_plus\Entity\Migration $migration */
+  /** @var \Drupal\migrate\Plugin\MigrationInterface $migration */
   foreach ($migrations as $migration) {
-    $destination = $migration->get('destination');
+    $destination = $migration->getDestinationConfiguration();
 
     // It should always be set. but its just a safety valve.
     if (!isset($destination['plugin'])) {
