@@ -14,7 +14,7 @@
         }
     ],
     "require": {
-        "drupal/migrate_file": "^1.1",
+        "drupal/migrate_file": "^2.0",
         "drupal/migrate_plus": "^5.0",
         "drupal/migrate_tools": "^5.0",
         "drupal/ultimate_cron": "^2.0@alpha"
