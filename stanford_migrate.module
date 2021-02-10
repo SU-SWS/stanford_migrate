@@ -92,7 +92,7 @@ function stanford_migrate_entity_delete(EntityInterface $entity) {
       strpos($destination['plugin'], 'entity:') !== FALSE ||
       strpos($destination['plugin'], 'entity_reference_revisions:') !== FALSE
     ) {
-      list(, $type) = explode(':', $destination['plugin']);
+      [, $type] = explode(':', $destination['plugin']);
 
       if ($type == $entity->getEntityTypeId()) {
         $table = 'migrate_map_' . $migration->id();
@@ -216,7 +216,12 @@ function stanford_migrate_migration_list() {
   // Do not return any migrations which fail to meet requirements.
   /** @var \Drupal\migrate\Plugin\MigrationInterface $migration */
   foreach ($matched_migrations as $id => $migration) {
-    if ($migration->getSourcePlugin() instanceof RequirementsInterface && $migration->status) {
+
+    if ($migration->getSourcePlugin() instanceof RequirementsInterface) {
+      // Status might not be set on the entity so check for it first.
+      if (isset($migration->status) && !$migration->status) {
+        continue;
+      }
       try {
         $migration->getSourcePlugin()->checkRequirements();
       }
@@ -233,8 +238,10 @@ function stanford_migrate_migration_list() {
 
   // Sort the matched migrations by group.
   if (!empty($matched_migrations)) {
+    /** @var \Drupal\migrate\Plugin\Migration $migration */
     foreach ($matched_migrations as $id => $migration) {
-      $configured_group_id = empty($migration->get('migration_group')) ? 'default' : $migration->get('migration_group');
+      $definition = $migration->getPluginDefinition();
+      $configured_group_id = $definition['migration_group'] ?? 'default';
       $migrations[$configured_group_id][$id] = $migration;
     }
   }
