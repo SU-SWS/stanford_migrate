@@ -31,6 +31,7 @@ class UrlCheck extends ProcessPluginBase {
    * SKip processing if the url is not valid.
    *
    * @param mixed $value
+   *   Value to check for url.
    * @param \Drupal\migrate\MigrateExecutableInterface $migrate_executable
    *   Migratable object.
    * @param \Drupal\migrate\Row $row
@@ -54,6 +55,7 @@ class UrlCheck extends ProcessPluginBase {
    * SKip current row if the url is not valid.
    *
    * @param mixed $value
+   *   Value to check for url.
    * @param \Drupal\migrate\MigrateExecutableInterface $migrate_executable
    *   Migratable object.
    * @param \Drupal\migrate\Row $row
