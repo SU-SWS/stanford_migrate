@@ -15,3 +15,20 @@ stanford_migrate.ultimate_cron:
     _title: 'Importer Cron Jobs'
   requirements:
     _permission: 'administer migrations'
+
+entity.migration.csv_upload:
+  path: '/admin/structure/migrate/manage/{migration_group}/migrations/{migration}/csv-upload'
+  defaults:
+    _entity_form: 'migration.upload-csv'
+    _title: 'Upload CSV'
+    _migrate_group: true
+  requirements:
+    _custom_access: 'Drupal\stanford_migrate\Form\StanfordMigrateCsvImportForm::access'
+    _entity_access: migration.update
+    _module_dependencies: migrate_source_csv
+  options:
+    parameters:
+      migration:
+        type: entity:migration
+      migration_group:
+        type: entity:migration_group

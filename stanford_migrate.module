@@ -64,6 +64,16 @@ function _stanford_migrate_get_time($arg = NULL) {
 }
 
 /**
+ * Implements hook_entity_type_alter().
+ */
+function stanford_migrate_entity_type_alter(array &$entity_types) {
+  if (\Drupal::moduleHandler()->moduleExists('migrate_source_csv')) {
+    $entity_types['migration']->setFormClass('upload-csv', 'Drupal\stanford_migrate\Form\StanfordMigrateCsvImportForm');
+    $entity_types['migration']->setLinkTemplate('upload-csv', '/admin/structure/migrate/manage/{migration_group}/migrations/{migration}/csv-upload');
+  }
+}
+
+/**
  * Implements hook_migrate_source_info_alter().
  */
 function stanford_migrate_migrate_source_info_alter(array &$definitions) {
