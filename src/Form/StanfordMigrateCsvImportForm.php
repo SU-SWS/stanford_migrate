@@ -88,7 +88,12 @@ class StanfordMigrateCsvImportForm extends EntityForm {
    */
   public function access(AccountInterface $account): AccessResult {
     $source_plugin = $this->migrationPlugin->getSourcePlugin();
-    return AccessResult::allowedIf($source_plugin->getPluginId() == 'csv');
+    // If the migration doesn't import csv, there's no reason to allow the form.
+    if ($source_plugin->getPluginId() != 'csv') {
+      AccessResult::forbidden();
+    }
+    $migration_id = $this->migrationPlugin->id();
+    return AccessResult::allowedIfHasPermission($account, "import $migration_id migration");
   }
 
   /**
@@ -97,14 +102,14 @@ class StanfordMigrateCsvImportForm extends EntityForm {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
     $migration_id = $this->entity->id();
-    $link = Link::fromTextAndUrl($this->t('empty CSV template'), $this->entity->toUrl('csv-template'))
+    $template_link = Link::fromTextAndUrl($this->t('empty CSV template'), $this->entity->toUrl('csv-template'))
       ->toString();
     $previously_uploaded_files = $this->state->get("stanford_migrate.csv.$migration_id", []);
 
     $form['csv'] = [
       '#type' => 'managed_file',
       '#title' => $this->t('CSV File'),
-      '#description' => $this->t('Download an @link for the importer.', ['@link' => $link]),
+      '#description' => $this->t('Download an @link for the importer.', ['@link' => $template_link]),
       '#upload_location' => 'private://csv/',
       '#upload_validators' => ['file_validate_extensions' => ['csv']],
       '#default_value' => array_slice($previously_uploaded_files, -1),
@@ -119,6 +124,7 @@ class StanfordMigrateCsvImportForm extends EntityForm {
       '#title' => $this->t('Previously Uploaded Files'),
     ];
 
+    // Create render arrays of links to the files.
     array_walk($previously_uploaded_files, function (&$file) {
       $file = [
         '#theme' => 'file_link',
@@ -158,6 +164,7 @@ class StanfordMigrateCsvImportForm extends EntityForm {
     $file = $this->entityTypeManager->getStorage('file')
       ->load($form_state->getValue(['csv', 0]));
 
+    // Make sure the file uploaded successfully.
     if (!$file || !file_exists($file->getFileUri())) {
       $form_state->setError($form['csv'], $this->t('Unable to load file'));
       return;
@@ -167,6 +174,8 @@ class StanfordMigrateCsvImportForm extends EntityForm {
     $header = fgetcsv($finput);
     fclose($finput);
 
+    // Make sure the file isn't empty. fgetcsv will return false if the file is
+    // empty.
     if (!$header) {
       $form_state->setError($form['csv'], $this->t('Unable to fetch the header row from the csv file.'));
       return;
@@ -177,6 +186,9 @@ class StanfordMigrateCsvImportForm extends EntityForm {
       $field = $field['selector'];
     });
 
+    // Check the uploaded file headers against the migration source fields to
+    // compare. The migrate_source_csv doesn't look at the headers and only uses
+    // their position.
     foreach ($header as $key => $header_value) {
       $header_value = preg_replace('/ .*?$/', '', $header_value);
 
@@ -210,10 +222,12 @@ class StanfordMigrateCsvImportForm extends EntityForm {
 
     $file_id = $form_state->getValue(['csv', 0]);
     if ($file_id) {
+      // Mark the file as permanent.
       $file = $this->entityTypeManager->getStorage('file')->load($file_id);
       $file->setPermanent();
       $file->save();
 
+      // Store the file id into state for use in the config overrider.
       $state = $this->state->get("stanford_migrate.csv.$migration_id", []);
       $state[] = $file_id;
       $this->state->set("stanford_migrate.csv.$migration_id", $state);
