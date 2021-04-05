@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Class MigrationCsvTemplate
+ * Class MigrationCsvTemplate.
  *
  * @package Drupal\stanford_migrate\Controller
  */

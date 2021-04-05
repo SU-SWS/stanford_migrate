@@ -4,7 +4,6 @@ namespace Drupal\stanford_migrate\Form;
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Cache\Cache;
-use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
@@ -42,20 +41,12 @@ class StanfordMigrateCsvImportForm extends EntityForm {
   protected $state;
 
   /**
-   * Core date formatter service.
-   *
-   * @var \Drupal\Core\Datetime\DateFormatterInterface
-   */
-  protected $dateFormatter;
-
-  /**
    * {@inheritDoc}
    */
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('plugin.manager.migration'),
-      $container->get('state'),
-      $container->get('date.formatter')
+      $container->get('state')
     );
   }
 
@@ -67,10 +58,9 @@ class StanfordMigrateCsvImportForm extends EntityForm {
    * @param \Drupal\Core\State\StateInterface $state
    *   Core state service.
    */
-  public function __construct(MigrationPluginManagerInterface $migration_manager, StateInterface $state, DateFormatterInterface $date_formatter) {
+  public function __construct(MigrationPluginManagerInterface $migration_manager, StateInterface $state) {
     $this->migrationManager = $migration_manager;
     $this->state = $state;
-    $this->dateFormatter = $date_formatter;
 
     /** @var \Drupal\migrate_plus\Entity\MigrationInterface $migration */
     $migration = $this->getRequest()->attributes->get('migration');
@@ -209,7 +199,7 @@ class StanfordMigrateCsvImportForm extends EntityForm {
     if ($form_state::hasAnyErrors()) {
       return;
     }
-    //Invalidate the migration
+    // Invalidate the migration cache since the file is changing.
     Cache::invalidateTags(['migration_plugins']);
     $migration_id = $this->entity->id();
 
