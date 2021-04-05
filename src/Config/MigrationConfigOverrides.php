@@ -59,10 +59,7 @@ class MigrationConfigOverrides implements ConfigFactoryOverrideInterface {
 
           /** @var \Drupal\file\FileInterface $file */
           // Make sure the file actually exists.
-          if (
-            ($file = $file_storage->load(end($file_ids))) &&
-            file_exists($file->getFileUri())
-          ) {
+          if ($file = $file_storage->load(end($file_ids))) {
             $overrides[$name]['source']['path'] = $file->getFileUri();
           }
         }
