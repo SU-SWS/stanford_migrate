@@ -19,6 +19,9 @@
         "drupal/migrate_tools": "^5.0",
         "drupal/ultimate_cron": "^2.0@alpha"
     },
+    "require-dev": {
+        "drupal/migrate_source_csv": "^3.4"
+    },
     "extra": {
         "patches": {
             "drupal/migrate_plus": {
