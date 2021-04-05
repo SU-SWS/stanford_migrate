@@ -3,7 +3,6 @@
 namespace Drupal\stanford_migrate\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\File\FileSystemInterface;
 use Drupal\migrate\Plugin\MigrationPluginManagerInterface;
 use Drupal\migrate_plus\Entity\Migration as MigrationEntity;
 use Drupal\migrate_plus\Entity\MigrationGroupInterface;
@@ -26,16 +25,11 @@ class MigrationCsvTemplate extends ControllerBase {
   protected $migrationManager;
 
   /**
-   * Core file system service.
-   *
-   * @var \Drupal\Core\File\FileSystemInterface
+   * {@inheritDoc}
    */
-  protected $fileSystem;
-
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('plugin.manager.migration'),
-      $container->get('file_system')
+      $container->get('plugin.manager.migration')
     );
   }
 
@@ -44,12 +38,9 @@ class MigrationCsvTemplate extends ControllerBase {
    *
    * @param \Drupal\migrate\Plugin\MigrationPluginManagerInterface $migration_manager
    *   Migration plugin manager service.
-   * @param \Drupal\Core\File\FileSystemInterface $file_system
-   *   Core file system service.
    */
-  public function __construct(MigrationPluginManagerInterface $migration_manager, FileSystemInterface $file_system) {
+  public function __construct(MigrationPluginManagerInterface $migration_manager) {
     $this->migrationManager = $migration_manager;
-    $this->fileSystem = $file_system;
   }
 
   /**
@@ -65,7 +56,7 @@ class MigrationCsvTemplate extends ControllerBase {
    *
    * @throws \Drupal\Component\Plugin\Exception\PluginException
    */
-  public function getEmptyTemplate(MigrationGroupInterface $migration_group, MigrationEntity $migration): BinaryFileResponse {
+  public function getEmptyTemplate(MigrationGroupInterface $migration_group, MigrationEntity $migration) {
     /** @var \Drupal\migrate\Plugin\MigrationInterface $migration_plugin */
     $migration_plugin = $this->migrationManager->createInstance($migration->id());
 
@@ -77,17 +68,20 @@ class MigrationCsvTemplate extends ControllerBase {
     $csv_headers = [];
     // Build the headers for the csv file.
     foreach ($migration_plugin->getSourceConfiguration()['fields'] as $source_field) {
-      $csv_headers[] = str_replace(',', '', sprintf('%s (%s)', $source_field['selector'], $source_field['label']));
+      $csv_headers[] = sprintf('%s (%s)', $source_field['selector'], $source_field['label']);
     }
 
     $file_name = $migration->id() . '.csv';
-    $uri = $this->fileSystem->saveData(implode(',', $csv_headers), "temporary://$file_name", FileSystemInterface::EXISTS_REPLACE);
+    $template = fopen(sys_get_temp_dir() . '/' . $file_name, 'w+');
+    fputcsv($template, $csv_headers);
+    fclose($template);
+
     $headers = [
       'Content-Type' => 'text/csv',
       'Content-Disposition' => 'attachment; filename="' . $file_name . '"',
     ];
     // Return the temporary file as a download.
-    return new BinaryFileResponse($uri, 200, $headers, FALSE);
+    return new BinaryFileResponse(sys_get_temp_dir() . '/' . $file_name, 200, $headers, FALSE);
   }
 
 }

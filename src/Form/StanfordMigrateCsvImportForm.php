@@ -99,6 +99,7 @@ class StanfordMigrateCsvImportForm extends EntityForm {
     $migration_id = $this->entity->id();
     $link = Link::fromTextAndUrl($this->t('empty CSV template'), $this->entity->toUrl('csv-template'))
       ->toString();
+    $previously_uploaded_files = $this->state->get("stanford_migrate.csv.$migration_id", []);
 
     $form['csv'] = [
       '#type' => 'managed_file',
@@ -106,7 +107,35 @@ class StanfordMigrateCsvImportForm extends EntityForm {
       '#description' => $this->t('Download an @link for the importer.', ['@link' => $link]),
       '#upload_location' => 'private://csv/',
       '#upload_validators' => ['file_validate_extensions' => ['csv']],
-      '#default_value' => array_filter([$this->state->get("stanford_migrate.csv.$migration_id")]),
+      '#default_value' => array_slice($previously_uploaded_files, -1),
+    ];
+
+    if (!count($previously_uploaded_files)) {
+      return $form;
+    }
+
+    $form['forget'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Previously Uploaded Files'),
+    ];
+
+    array_walk($previously_uploaded_files, function (&$file) {
+      $file = [
+        '#theme' => 'file_link',
+        '#file' => $this->entityTypeManager->getStorage('file')->load($file),
+      ];
+    });
+
+    $form['forget']['previous_files'] = [
+      '#theme' => 'item_list',
+      '#list_type' => 'ul',
+      '#items' => $previously_uploaded_files,
+    ];
+
+    $form['forget']['forget_previous'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Forget previously imported content.'),
+      '#description' => $this->t('<strong>DANGER</strong>: Leave this box uncheck to update existing content based on the unique identifier column(s): %ids.', ['%ids' => implode(', ', $this->migrationPlugin->getSourceConfiguration()['ids'])]),
     ];
 
     return $form;
@@ -115,24 +144,85 @@ class StanfordMigrateCsvImportForm extends EntityForm {
   /**
    * {@inheritDoc}
    */
-  public function save(array $form, FormStateInterface $form_state) {
-    // Don't save the entity, we'll store the value in state and use it in a
-    // config overrider.
-    $file_id = $form_state->getValue(['csv', 0]);
-    $migration_id = $this->entity->id();
-
-    $max_age = $this->configFactory()
-      ->get('system.file')
-      ->get('temporary_maximum_age');
-    $this->state->delete("stanford_migrate.csv.$migration_id");
-
-    if ($file_id) {
-      $this->state->set("stanford_migrate.csv.$migration_id", $file_id);
-      $this->messenger()
-        ->addStatus($this->t('File temporarily saved. It will be retained for %max_age', ['%max_age' => $this->dateFormatter->formatInterval($max_age)]));
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    parent::validateForm($form, $form_state);
+    // When removing the original file, don't go through validating.
+    if (
+      $form_state->getTriggeringElement()['#name'] == 'csv_remove_button' ||
+      empty($form_state->getValue(['csv', 0]))
+    ) {
+      return;
     }
 
+    /** @var \Drupal\file\FileInterface $file */
+    $file = $this->entityTypeManager->getStorage('file')
+      ->load($form_state->getValue(['csv', 0]));
+
+    if (!$file || !file_exists($file->getFileUri())) {
+      $form_state->setError($form['csv'], $this->t('Unable to load file'));
+      return;
+    }
+
+    $finput = fopen($file->getFileUri(), 'r');
+    $header = fgetcsv($finput);
+    fclose($finput);
+
+    if (!$header) {
+      $form_state->setError($form['csv'], $this->t('Unable to fetch the header row from the csv file.'));
+      return;
+    }
+
+    $migration_fields = $this->migrationPlugin->getSourceConfiguration()['fields'];
+    array_walk($migration_fields, function (&$field) {
+      $field = $field['selector'];
+    });
+
+    foreach ($header as $key => $header_value) {
+      $header_value = preg_replace('/ .*?$/', '', $header_value);
+
+      if (!isset($migration_fields[$key]) || $migration_fields[$key] != $header_value) {
+        $form_state->setError($form['csv'], $this->t('Invalid headers order.'));
+        return;
+      }
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * Don't save the entity, we'll store the value in state and use it in config
+   * overrider.
+   */
+  public function save(array $form, FormStateInterface $form_state) {
+    if ($form_state::hasAnyErrors()) {
+      return;
+    }
+    //Invalidate the migration
     Cache::invalidateTags(['migration_plugins']);
+    $migration_id = $this->entity->id();
+
+    // Destroy the database tables to forget all imported content. The tables
+    // will be re-created on the next import.
+    if ($form_state->getValue('forget_previous')) {
+      $this->migrationPlugin->getIdMap()->destroy();
+      $this->state->delete("stanford_migrate.csv.$migration_id");
+    }
+
+    $file_id = $form_state->getValue(['csv', 0]);
+    if ($file_id) {
+      $file = $this->entityTypeManager->getStorage('file')->load($file_id);
+      $file->setPermanent();
+      $file->save();
+
+      $state = $this->state->get("stanford_migrate.csv.$migration_id", []);
+      $state[] = $file_id;
+      $this->state->set("stanford_migrate.csv.$migration_id", $state);
+
+      $link = Link::createFromRoute($this->t('import page'), 'stanford_migrate.list')
+        ->toString();
+      $this->messenger()
+        ->addStatus($this->t('File saved. Import the contents on the @link.', ['@link' => $link]));
+    }
   }
 
 }

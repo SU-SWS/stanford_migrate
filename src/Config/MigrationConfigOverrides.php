@@ -54,13 +54,13 @@ class MigrationConfigOverrides implements ConfigFactoryOverrideInterface {
         $migration_id = pathinfo($name, PATHINFO_EXTENSION);
 
         // If the state value is not set, don't do any overriding.
-        if ($file_id = $this->state->get("stanford_migrate.csv.$migration_id")) {
+        if ($file_ids = $this->state->get("stanford_migrate.csv.$migration_id", [])) {
           $file_storage = $this->entityTypeManager->getStorage('file');
 
           /** @var \Drupal\file\FileInterface $file */
           // Make sure the file actually exists.
           if (
-            ($file = $file_storage->load($file_id)) &&
+            ($file = $file_storage->load(end($file_ids))) &&
             file_exists($file->getFileUri())
           ) {
             $overrides[$name]['source']['path'] = $file->getFileUri();
