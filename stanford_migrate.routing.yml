@@ -32,3 +32,19 @@ entity.migration.csv_upload:
         type: entity:migration
       migration_group:
         type: entity:migration_group
+
+entity.migration.csv_template:
+  path: '/admin/structure/migrate/manage/{migration_group}/migrations/{migration}/csv-template'
+  defaults:
+    _controller: '\Drupal\stanford_migrate\Controller\MigrationCsvTemplate::getEmptyTemplate'
+    _title: 'CSV Template'
+    _migrate_group: true
+  requirements:
+    _entity_access: migration.update
+    _module_dependencies: migrate_source_csv
+  options:
+    parameters:
+      migration:
+        type: entity:migration
+      migration_group:
+        type: entity:migration_group

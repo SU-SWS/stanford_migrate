@@ -3,9 +3,11 @@
 namespace Drupal\stanford_migrate\Form;
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Link;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\migrate\Plugin\MigrationPluginManagerInterface;
@@ -95,9 +97,13 @@ class StanfordMigrateCsvImportForm extends EntityForm {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
     $migration_id = $this->entity->id();
+    $link = Link::fromTextAndUrl($this->t('empty CSV template'), $this->entity->toUrl('csv-template'))
+      ->toString();
+
     $form['csv'] = [
       '#type' => 'managed_file',
       '#title' => $this->t('CSV File'),
+      '#description' => $this->t('Download an @link for the importer.', ['@link' => $link]),
       '#upload_location' => 'private://csv/',
       '#upload_validators' => ['file_validate_extensions' => ['csv']],
       '#default_value' => array_filter([$this->state->get("stanford_migrate.csv.$migration_id")]),
@@ -125,6 +131,8 @@ class StanfordMigrateCsvImportForm extends EntityForm {
       $this->messenger()
         ->addStatus($this->t('File temporarily saved. It will be retained for %max_age', ['%max_age' => $this->dateFormatter->formatInterval($max_age)]));
     }
+
+    Cache::invalidateTags(['migration_plugins']);
   }
 
 }
