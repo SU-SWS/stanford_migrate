@@ -80,7 +80,7 @@ class StanfordMigrateCsvImportForm extends EntityForm {
     $source_plugin = $this->migrationPlugin->getSourcePlugin();
     // If the migration doesn't import csv, there's no reason to allow the form.
     if ($source_plugin->getPluginId() != 'csv') {
-      AccessResult::forbidden();
+      return AccessResult::forbidden();
     }
     $migration_id = $this->migrationPlugin->id();
     return AccessResult::allowedIfHasPermission($account, "import $migration_id migration");

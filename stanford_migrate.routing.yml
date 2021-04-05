@@ -19,7 +19,7 @@ stanford_migrate.ultimate_cron:
 entity.migration.csv_upload:
   path: '/admin/structure/migrate/manage/{migration_group}/migrations/{migration}/csv-upload'
   defaults:
-    _entity_form: 'migration.upload-csv'
+    _entity_form: 'migration.csv-upload'
     _title: 'Upload CSV'
     _migrate_group: true
   requirements:
