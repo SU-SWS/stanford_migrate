@@ -33,7 +33,7 @@ entity.migration.csv_upload:
         type: entity:migration_group
 
 entity.migration.csv_template:
-  path: '/admin/structure/migrate/manage/{migration_group}/migrations/{migration}/csv-template'
+  path: '/admin/structure/migrate/migrations/{migration}/csv-template'
   defaults:
     _controller: '\Drupal\stanford_migrate\Controller\MigrationCsvTemplate::getEmptyTemplate'
     _title: 'CSV Template'
@@ -45,5 +45,3 @@ entity.migration.csv_template:
     parameters:
       migration:
         type: entity:migration
-      migration_group:
-        type: entity:migration_group
