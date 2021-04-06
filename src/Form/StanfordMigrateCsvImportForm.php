@@ -223,8 +223,10 @@ class StanfordMigrateCsvImportForm extends EntityForm {
 
       // Remove the file usage tracking on the previously uploaded files.
       $previous_fids = $this->state->get("stanford_migrate.csv.$migration_id", []);
-      foreach ($this->entityTypeManager->getStorage($previous_fids) as $previous_file) {
-        $this->fileUsage->delete($previous_file, 'stanford_migrate', 'migration', $migration_id);
+      if ($previous_fids) {
+        foreach ($this->entityTypeManager->getStorage($previous_fids) as $previous_file) {
+          $this->fileUsage->delete($previous_file, 'stanford_migrate', 'migration', $migration_id);
+        }
       }
       $this->state->delete("stanford_migrate.csv.$migration_id");
     }
