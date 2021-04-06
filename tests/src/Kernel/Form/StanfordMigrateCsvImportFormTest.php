@@ -4,6 +4,7 @@ namespace Drupal\Tests\stanford_migrate\Kernel\Form;
 
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\file\Entity\File;
 use Drupal\migrate_plus\Entity\Migration;
 use Drupal\migrate_plus\Entity\MigrationGroup;
 use Drupal\migrate_plus\Entity\MigrationInterface;
@@ -69,20 +70,65 @@ class StanfordMigrateCsvImportFormTest extends StanfordMigrateKernelTestBase {
     $this->assertTrue($form_object->access($account)->isAllowed());
   }
 
+  /**
+   * Test the functionality of the form.
+   */
   public function testBuildForm() {
     $this->setCsvMigrationRequest();
     $form = [];
     $form_state = new FormState();
     $form_object = \Drupal::entityTypeManager()
       ->getFormObject('migration', 'csv-upload');
+
     $form_object->setEntity(Migration::load('stanford_migrate'));
 
     $form = $form_object->buildForm($form, $form_state);
     $this->assertArrayNotHasKey('forget', $form);
 
     \Drupal::state()->set('stanford_migrate.csv.stanford_migrate', [1, 2, 3]);
+
     $form = $form_object->buildForm($form, $form_state);
     $this->assertArrayHasKey('forget', $form);
+
+    $form_state->setTriggeringElement(['#name' => 'foo']);
+    $form_object->validateForm($form, $form_state);
+    $this->assertFalse($form_state::hasAnyErrors());
+
+    $file = File::create(['uri' => 'public://foo.csv']);
+    $file->save();
+
+    $form['csv']['#parents'] = [];
+    $form_state->setValue(['csv', 0], $file->id());
+    $form_object->validateForm($form, $form_state);
+    $this->assertTrue($form_state::hasAnyErrors());
+
+    $form_state->clearErrors();
+    file_put_contents('public://import.csv', '');
+    $file->set('uri','public://import.csv')->save();
+    $form_object->validateForm($form, $form_state);
+    $this->assertTrue($form_state::hasAnyErrors());
+
+    $f = fopen('public://import.csv', 'w');
+    fputcsv($f, ['foo', 'bar']);
+    fclose($f);
+
+    $form_state->clearErrors();
+    $form_object->validateForm($form, $form_state);
+    $this->assertTrue($form_state::hasAnyErrors());
+
+    $f = fopen('public://import.csv', 'w');
+    fputcsv($f, ['guid', 'title']);
+    fclose($f);
+
+    $form_state->clearErrors();
+    $form_object->validateForm($form, $form_state);
+    $this->assertFalse($form_state::hasAnyErrors());
+
+    \Drupal::state()->delete('stanford_migrate.csv.stanford_migrate');
+    $form_state->setValue('forget_previous', 1);
+    $form_object->save($form, $form_state);
+    $state = \Drupal::state()->get('stanford_migrate.csv.stanford_migrate');
+    $this->assertEquals([$file->id()], $state);
   }
 
   /**
