@@ -36,12 +36,11 @@ class MigrationCsvTemplateTest extends StanfordMigrateKernelTestBase {
    * Migrations that aren't csv importers throw 404 response.
    */
   public function testNotFound() {
-    $migrate_group = MigrationGroup::create([]);
     $migration = Migration::load('stanford_migrate');
     $controller = MigrationCsvTemplate::create(\Drupal::getContainer());
 
     $this->expectException(NotFoundHttpException::class);
-    $controller->getEmptyTemplate($migrate_group, $migration);
+    $controller->getEmptyTemplate($migration);
   }
 
   /**
@@ -55,10 +54,9 @@ class MigrationCsvTemplateTest extends StanfordMigrateKernelTestBase {
       ->set('source.ids', ['guid'])
       ->save();
 
-    $migrate_group = MigrationGroup::create([]);
     $migration = Migration::load('stanford_migrate');
     $controller = MigrationCsvTemplate::create(\Drupal::getContainer());
-    $response = $controller->getEmptyTemplate($migrate_group, $migration);
+    $response = $controller->getEmptyTemplate($migration);
     $this->assertInstanceOf(BinaryFileResponse::class, $response);
     $contents = file_get_contents($response->getFile()->getRealPath());
 

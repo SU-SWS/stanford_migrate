@@ -5,7 +5,6 @@ namespace Drupal\stanford_migrate\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\migrate\Plugin\MigrationPluginManagerInterface;
 use Drupal\migrate_plus\Entity\Migration as MigrationEntity;
-use Drupal\migrate_plus\Entity\MigrationGroupInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
