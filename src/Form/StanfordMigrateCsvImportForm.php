@@ -116,8 +116,6 @@ class StanfordMigrateCsvImportForm extends EntityForm {
       '#upload_validators' => ['file_validate_extensions' => ['csv']],
       '#default_value' => array_slice($previously_uploaded_files, -1),
     ];
-    $file = $this->entityTypeManager->getStorage('file')
-      ->load(end($previously_uploaded_files));
 
     if (!count($previously_uploaded_files)) {
       return $form;
