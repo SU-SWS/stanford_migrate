@@ -9,6 +9,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\State\StateInterface;
+use Drupal\file\FileUsage\FileUsageInterface;
 use Drupal\migrate\Plugin\MigrationPluginManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -41,12 +42,20 @@ class StanfordMigrateCsvImportForm extends EntityForm {
   protected $state;
 
   /**
+   * File module usage service.
+   *
+   * @var \Drupal\file\FileUsage\FileUsageInterface
+   */
+  protected $fileUsage;
+
+  /**
    * {@inheritDoc}
    */
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('plugin.manager.migration'),
-      $container->get('state')
+      $container->get('state'),
+      $container->get('file.usage')
     );
   }
 
@@ -57,10 +66,13 @@ class StanfordMigrateCsvImportForm extends EntityForm {
    *   Migration plugin manager service.
    * @param \Drupal\Core\State\StateInterface $state
    *   Core state service.
+   * @param \Drupal\file\FileUsage\FileUsageInterface $file_usage
+   *   File module usage service.
    */
-  public function __construct(MigrationPluginManagerInterface $migration_manager, StateInterface $state) {
+  public function __construct(MigrationPluginManagerInterface $migration_manager, StateInterface $state, FileUsageInterface $file_usage) {
     $this->migrationManager = $migration_manager;
     $this->state = $state;
+    $this->fileUsage = $file_usage;
 
     /** @var \Drupal\migrate_plus\Entity\MigrationInterface $migration */
     $migration = $this->getRequest()->attributes->get('migration');
@@ -100,10 +112,12 @@ class StanfordMigrateCsvImportForm extends EntityForm {
       '#type' => 'managed_file',
       '#title' => $this->t('CSV File'),
       '#description' => $this->t('Download an @link for the importer.', ['@link' => $template_link]),
-      '#upload_location' => 'private://csv/',
+      '#upload_location' => 'public://csv/',
       '#upload_validators' => ['file_validate_extensions' => ['csv']],
       '#default_value' => array_slice($previously_uploaded_files, -1),
     ];
+    $file = $this->entityTypeManager->getStorage('file')
+      ->load(end($previously_uploaded_files));
 
     if (!count($previously_uploaded_files)) {
       return $form;
@@ -133,7 +147,6 @@ class StanfordMigrateCsvImportForm extends EntityForm {
       '#title' => $this->t('Forget previously imported content.'),
       '#description' => $this->t('<strong>DANGER</strong>: Leave this box uncheck to update existing content based on the unique identifier column(s): %ids.', ['%ids' => implode(', ', $this->migrationPlugin->getSourceConfiguration()['ids'])]),
     ];
-
     return $form;
   }
 
@@ -201,18 +214,26 @@ class StanfordMigrateCsvImportForm extends EntityForm {
     }
     // Invalidate the migration cache since the file is changing.
     Cache::invalidateTags(['migration_plugins']);
+    $this->migrationPlugin->getIdMap()->prepareUpdate();
     $migration_id = $this->entity->id();
 
-    // Destroy the database tables to forget all imported content. The tables
-    // will be re-created on the next import.
+    // Previous imported content will be forgotten about.
     if ($form_state->getValue('forget_previous')) {
+      // Destroy the database tables to forget all imported content. The tables
+      // will be re-created on the next import.
       $this->migrationPlugin->getIdMap()->destroy();
+
+      // Remove the file usage tracking on the previously uploaded files.
+      $previous_fids = $this->state->get("stanford_migrate.csv.$migration_id", []);
+      foreach ($this->entityTypeManager->getStorage($previous_fids) as $previous_file) {
+        $this->fileUsage->delete($previous_file, 'stanford_migrate', 'migration', $migration_id);
+      }
       $this->state->delete("stanford_migrate.csv.$migration_id");
     }
 
     $file_id = $form_state->getValue(['csv', 0]);
     if ($file_id) {
-      // Mark the file as permanent.
+      // Mark the file as permanent and save it.
       $file = $this->entityTypeManager->getStorage('file')->load($file_id);
       $file->setPermanent();
       $file->save();
@@ -220,12 +241,15 @@ class StanfordMigrateCsvImportForm extends EntityForm {
       // Store the file id into state for use in the config overrider.
       $state = $this->state->get("stanford_migrate.csv.$migration_id", []);
       $state[] = $file_id;
-      $this->state->set("stanford_migrate.csv.$migration_id", $state);
+      $this->state->set("stanford_migrate.csv.$migration_id", array_unique($state));
 
       $link = Link::createFromRoute($this->t('import page'), 'stanford_migrate.list')
         ->toString();
       $this->messenger()
         ->addStatus($this->t('File saved. Import the contents on the @link.', ['@link' => $link]));
+
+      // Track the file usage on the migration.
+      $this->fileUsage->add($file, 'stanford_migrate', 'migration', $migration_id);
     }
   }
 

@@ -37,7 +37,6 @@ entity.migration.csv_template:
   defaults:
     _controller: '\Drupal\stanford_migrate\Controller\MigrationCsvTemplate::getEmptyTemplate'
     _title: 'CSV Template'
-    _migrate_group: true
   requirements:
     _custom_access: 'Drupal\stanford_migrate\Form\StanfordMigrateCsvImportForm::access'
     _module_dependencies: migrate_source_csv

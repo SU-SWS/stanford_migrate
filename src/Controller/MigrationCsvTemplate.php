@@ -46,8 +46,6 @@ class MigrationCsvTemplate extends ControllerBase {
   /**
    * Get a csv template with a header row for easily populating a datasheet.
    *
-   * @param \Drupal\migrate_plus\Entity\MigrationGroupInterface $migration_group
-   *   Migration group entity.
    * @param \Drupal\migrate_plus\Entity\Migration $migration
    *   Migration config entity, not the migration plugin.
    *
@@ -56,7 +54,7 @@ class MigrationCsvTemplate extends ControllerBase {
    *
    * @throws \Drupal\Component\Plugin\Exception\PluginException
    */
-  public function getEmptyTemplate(MigrationGroupInterface $migration_group, MigrationEntity $migration) {
+  public function getEmptyTemplate(MigrationEntity $migration) {
     /** @var \Drupal\migrate\Plugin\MigrationInterface $migration_plugin */
     $migration_plugin = $this->migrationManager->createInstance($migration->id());
 
