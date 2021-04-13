@@ -88,9 +88,6 @@ function stanford_migrate_entity_delete(EntityInterface $entity) {
   /** @var \Drupal\migrate\Plugin\MigrationInterface $migration */
   foreach (stanford_migrate_migration_list() as $group => $migrations) {
     foreach ($migrations as $migration) {
-      if(is_string($migration)){
-        var_dump($migration);
-      }
       $destination = $migration->getDestinationConfiguration();
 
       // It should always be set. but its just a safety valve.
@@ -105,13 +102,15 @@ function stanford_migrate_entity_delete(EntityInterface $entity) {
         [, $type] = explode(':', $destination['plugin']);
 
         if ($type == $entity->getEntityTypeId()) {
-          $id_key = \Drupal::entityTypeManager()
-            ->getDefinition($entity->getEntityTypeId())
-            ->getKey('id');
+          $lookup_values = [];
+          $lookup_ids = array_keys($migration->getDestinationPlugin()
+            ->getIds());
 
+          foreach ($lookup_ids as $id_key) {
+            $lookup_values[$id_key] = $entity->get($id_key)->getString();
+          }
           $migration->getIdMap()
-            ->deleteDestination([$id_key => $entity->id()]);
-          return;
+            ->deleteDestination($lookup_values);
         }
       }
     }
@@ -256,5 +255,6 @@ function stanford_migrate_migration_list() {
       $migrations[$configured_group_id][$id] = $migration;
     }
   }
+
   return isset($migrations) ? $migrations : [];
 }
