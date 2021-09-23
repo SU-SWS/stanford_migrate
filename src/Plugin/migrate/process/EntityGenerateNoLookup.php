@@ -45,6 +45,11 @@ class EntityGenerateNoLookup extends EntityGenerate {
     $this->row = $row;
     $this->migrateExecutable = $migrateExecutable;
 
+    // If the source data is an empty array, return the same.
+    if (gettype($value) === 'array' && count($value) === 0) {
+      return [];
+    }
+
     // In case of subfields ('field_reference/target_id'), extract the field
     // name only.
     $parts = explode('/', $destinationProperty);

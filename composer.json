@@ -18,7 +18,8 @@
         "drupal/migrate_plus": "^5.0",
         "drupal/migrate_tools": "^5.0",
         "drupal/ultimate_cron": "^2.0@alpha",
-        "drupal/migrate_source_csv": "^3.4"
+        "drupal/migrate_source_csv": "^3.4",
+        "joshfraser/php-name-parser": "dev-master"
     },
     "extra": {
         "patches": {
