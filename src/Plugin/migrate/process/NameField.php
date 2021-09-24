@@ -29,10 +29,9 @@ class NameField extends ProcessPluginBase {
   public function transform($value, MigrateExecutableInterface $migrate_executable, Row $row, $destination_property) {
     $parser = new \FullNameParser();
     $info = $parser->parse_name($value);
-
     return [
       'title' => $info['salutation'] ?? '',
-      'given' => $info['fname'] ?? '',
+      'given' => !empty($info['fname']) ? $info['fname'] : $info['initials'],
       'middle' => $info['mname'] ?? '',
       'family' => $info['lname'] ?? '',
     ];
