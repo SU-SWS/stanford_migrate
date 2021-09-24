@@ -32,7 +32,6 @@ class NameFieldTest extends UnitTestCase {
     $expected = [
       'title' => 'Mr.',
       'given' => 'John',
-      'middle' => '',
       'family' => 'Doe',
     ];
     $this->assertEquals($expected, $name_info);
@@ -41,7 +40,6 @@ class NameFieldTest extends UnitTestCase {
     $expected = [
       'title' => '',
       'given' => 'John',
-      'middle' => '',
       'family' => 'Doe',
     ];
     $this->assertEquals($expected, $name_info);
