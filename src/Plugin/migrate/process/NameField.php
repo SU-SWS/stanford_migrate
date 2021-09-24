@@ -32,7 +32,6 @@ class NameField extends ProcessPluginBase {
     return [
       'title' => $name['salutation'],
       'given' => !empty($name['fname']) ? $name['fname'] : $name['initials'],
-      'middle' => $name['mname'],
       'family' => trim($name['lname'] . ' ' . $name['suffix']),
     ];
 
