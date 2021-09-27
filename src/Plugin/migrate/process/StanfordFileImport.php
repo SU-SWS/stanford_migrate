@@ -24,7 +24,7 @@ class StanfordFileImport extends FileImport {
         $size = is_array($headers['Content-Length']) ? end($headers['Content-Length']) : $headers['Content-Length'];
 
         if ((int) $size <= Bytes::toNumber($this->configuration['max_size'])) {
-          $allowed = true;
+          $allowed = TRUE;
         }
       }
 
