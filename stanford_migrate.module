@@ -98,6 +98,15 @@ function stanford_migrate_data_parser_info_alter(array &$definitions) {
 }
 
 /**
+ * Implements hook_migrate_process_info_alter().
+ */
+function stanford_migrate_migrate_process_info_alter(array &$definitions) {
+  if (!empty($definitions['file_import'])) {
+    $definitions['file_import']['class'] = '\Drupal\stanford_migrate\Plugin\migrate\process\StanfordFileImport';
+  }
+}
+
+/**
  * Implements hook_entity_delete().
  *
  * When an entity is manually deleted from the database, we want to remove it
