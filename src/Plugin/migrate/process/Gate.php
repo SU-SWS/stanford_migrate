@@ -37,9 +37,7 @@ use Drupal\migrate\Row;
  * - valid_keys: Value or array of values that are valid keys.
  * - key_direction: lock or unlock.
  *
- * @codingStandardsIgnore
- *    We don't need test coverage for this because it's a direct copy from the
- *    migrate_plus module dev version.
+ * @codingStandardsIgnoreStart
  *
  * Examples:
  *
@@ -81,6 +79,11 @@ use Drupal\migrate\Row;
  *     key_direction: lock
  * @endcode
  *
+ * @codingStandardsIgnoreEnd
+ *
+ * @codeCoverageIgnore
+ *   We don't need test coverage for this because it's a direct copy from the
+ *   migrate_plus module dev version.
  */
 class Gate extends ProcessPluginBase {
 
