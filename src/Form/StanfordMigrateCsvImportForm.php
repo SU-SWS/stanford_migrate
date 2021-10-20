@@ -119,9 +119,9 @@ class StanfordMigrateCsvImportForm extends EntityForm {
         '@link' => $template_link,
         '%title' => $this->entity->label(),
       ]),
+      '#required' => TRUE,
       '#upload_location' => 'public://csv/',
       '#upload_validators' => ['file_validate_extensions' => ['csv']],
-      '#default_value' => array_slice($previously_uploaded_files, -1),
     ];
     if (!empty($this->entity->get('source')['csv_help'])) {
       $help = $this->entity->get('source')['csv_help'];
@@ -129,6 +129,7 @@ class StanfordMigrateCsvImportForm extends EntityForm {
         '#markup' => is_array($help) ? implode('<br>', $help) : $help,
       ];
     }
+    unset($form['actions']['submit']);
     $form['actions']['import'] = [
       '#type' => 'submit',
       '#value' => $this->t('Save and Import'),
@@ -142,6 +143,7 @@ class StanfordMigrateCsvImportForm extends EntityForm {
     $form['forget'] = [
       '#type' => 'details',
       '#title' => $this->t('Previously Uploaded Files'),
+      '#open' => TRUE,
     ];
 
     // Create render arrays of links to the files.
@@ -157,11 +159,13 @@ class StanfordMigrateCsvImportForm extends EntityForm {
       '#list_type' => 'ul',
       '#items' => $previously_uploaded_files,
     ];
+    $form['forget']['previous_files_help']['#markup'] = $this->t('<p><strong>DANGER</strong>: To avoid overwriting any of the previously imported content; check the unique ID column(s) (%ids) on the previously uploaded CSV file. Each imported item (Row) should have the unique values in the columns(s).</p>', ['%ids' => implode(', ', $this->migrationPlugin->getSourceConfiguration()['ids'])]);
 
     $form['forget']['forget_previous'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Forget previously imported content.'),
       '#description' => $this->t('<strong>DANGER</strong>: Leave this box unchecked to update existing content based on the unique identifier column(s): %ids.', ['%ids' => implode(', ', $this->migrationPlugin->getSourceConfiguration()['ids'])]),
+      '#access' => $this->currentUser()->id() == 1,
     ];
     return $form;
   }
@@ -260,9 +264,9 @@ class StanfordMigrateCsvImportForm extends EntityForm {
       $this->fixLineBreaks($file->getFileUri());
 
       // Store the file id into state for use in the config overrider.
-      $state = $this->state->get("stanford_migrate.csv.$migration_id", []);
+      $state = $this->state->get("stanford_migrate.csv.$migration_id",[]);
       $state[] = $file_id;
-      $this->state->set("stanford_migrate.csv.$migration_id", array_unique($state));
+      $this->state->set("stanford_migrate.csv.$migration_id", $state);
 
       $link = Link::createFromRoute($this->t('import page'), 'stanford_migrate.list')
         ->toString();
