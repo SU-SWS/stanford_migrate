@@ -264,7 +264,7 @@ class StanfordMigrateCsvImportForm extends EntityForm {
       $this->fixLineBreaks($file->getFileUri());
 
       // Store the file id into state for use in the config overrider.
-      $state = $this->state->get("stanford_migrate.csv.$migration_id",[]);
+      $state = $this->state->get("stanford_migrate.csv.$migration_id", []);
       $state[] = $file_id;
       $this->state->set("stanford_migrate.csv.$migration_id", $state);
 
