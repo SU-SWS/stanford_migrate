@@ -51,6 +51,14 @@ class NameFieldTest extends UnitTestCase {
       'family' => 'Doe',
     ];
     $this->assertEquals($expected, $name_info);
+
+    $name_info = $plugin->transform('Drupal', $migrate_executable, $row, 'field_stuff');
+    $expected = [
+      'title' => '',
+      'given' => '',
+      'family' => 'Drupal',
+    ];
+    $this->assertEquals($expected, $name_info);
   }
 
 }

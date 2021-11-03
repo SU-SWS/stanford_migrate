@@ -29,12 +29,16 @@ class NameField extends ProcessPluginBase {
    */
   public function transform($value, MigrateExecutableInterface $migrate_executable, Row $row, $destination_property) {
     $name = FullNameParser::parse($value);
-    return [
+    $name = [
       'title' => $name['salutation'],
       'given' => !empty($name['fname']) ? $name['fname'] : $name['initials'],
       'family' => trim($name['lname'] . ' ' . $name['suffix']),
     ];
-
+    if (empty($name['family']) && $name['given']) {
+      $name['family'] = $name['given'];
+      $name['given'] = '';
+    }
+    return $name;
   }
 
 }
