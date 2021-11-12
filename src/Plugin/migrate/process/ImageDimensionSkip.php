@@ -99,7 +99,7 @@ class ImageDimensionSkip extends ProcessPluginBase {
       return FALSE;
     }
     try {
-      [$width, $height] = getimagesize($value);
+      [$width, $height] = @getimagesize($value);
     }
     catch (\Exception $e) {
       return FALSE;
