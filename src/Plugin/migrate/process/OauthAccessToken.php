@@ -68,7 +68,6 @@ class OauthAccessToken extends ProcessPluginBase implements ContainerFactoryPlug
     return trim(reset($bearer_match));
   }
 
-
   /**
    * Returns the initialized authentication plugin.
    *
