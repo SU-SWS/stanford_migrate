@@ -5,16 +5,21 @@
  * Contains stanford_migrate.module.
  */
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Installer\InstallerKernel;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\migrate\Exception\RequirementsException;
 use Drupal\migrate\MigrateMessage;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\migrate\Plugin\RequirementsInterface;
 use Drupal\migrate_plus\Entity\Migration;
 use Drupal\migrate_tools\MigrateExecutable;
+use Drupal\node\NodeInterface;
 use Drupal\ultimate_cron\CronJobInterface;
 
 /**
@@ -31,6 +36,93 @@ function stanford_migrate_help($route_name, RouteMatchInterface $route_match) {
 
     default:
   }
+}
+
+/**
+ * Get the migration that imported the given node.
+ *
+ * @param \Drupal\node\NodeInterface $node
+ *   Node entity.
+ *
+ * @return array|\Drupal\migrate_plus\Entity\MigrationInterface|mixed
+ *   Migration entity or null/false if none found.
+ */
+function stanford_migrate_get_migration(NodeInterface $node) {
+  // Use a static variable so that it doesn't look up the migrations multiple
+  // times.
+  $node_migration = &drupal_static(__FUNCTION__ . $node->id());
+  if (!is_null($node_migration)) {
+    return $node_migration;
+  }
+  // Se the static to false and check for null above. If the first attempt to
+  // find a migration doesn't show anything, we don't want to continue checking.
+  $node_migration = FALSE;
+
+  $plugin_manager = \Drupal::service('plugin.manager.migration');
+
+  // Loop through the migration entities, build their migration plugins so that
+  // we can dig into their source mapping data.
+  /** @var \Drupal\migrate_plus\Entity\MigrationInterface $migration */
+  foreach (Migration::loadMultiple() as $migration) {
+
+    // This migrate entity has methods that allow easy queries on the
+    // migrate_map tables.
+    /** @var \Drupal\migrate\Plugin\MigrationInterface $migrate */
+    $migrate = $plugin_manager->createInstance($migration->id());
+
+    // CSV Imported content can be ignored since it's normally a one time thing.
+    if ($migrate->getSourcePlugin()->getPluginId() == 'csv') {
+      continue;
+    }
+
+    $destination_ids = $migrate->getDestinationPlugin()->getIds();
+
+    // Ignore any migrate plugin that doesn't map to nodes.
+    if (isset($destination_ids['nid'])) {
+
+      // If the migrate id map returns something, that means this node is tied
+      // to this migration. Set the static variable for later references and
+      // get out of here.
+      if (!empty($migrate->getIdMap()->lookupSourceId(['nid' => $node->id()]))) {
+        $node_migration = $migration;
+        return $migration;
+      }
+    }
+  }
+
+}
+
+/**
+ * Implements hook_entity_field_access().
+ */
+function stanford_migrate_entity_field_access($operation, FieldDefinitionInterface $field_definition, AccountInterface $account, FieldItemListInterface $items = NULL) {
+  $route_match = \Drupal::routeMatch();
+  // When edit an existing node that was imported via migrate module, mark the
+  // fields that are mapped from migration as forbidden.
+  if (
+    $operation == 'edit' &&
+    $route_match->getRouteName() == 'entity.node.edit_form' &&
+    $migration = stanford_migrate_get_migration($route_match->getParameter('node'))
+  ) {
+    $field_name = $field_definition->getName();
+    $columns = $field_definition->getFieldStorageDefinition()->getColumns();
+    $processing = !empty($migration->process[$field_name]);
+
+    // This will check if a migrate process is mapped to a specific column on
+    // the field.
+    foreach (array_keys($columns) as $column) {
+      $processing = $processing ?: !empty($migration->process["$field_name/$column"]);
+    }
+
+    if ($processing) {
+      \Drupal::messenger()
+        ->addWarning(t('Some fields can not be edited since they contain imported & synced data. They are not visible here.'));
+
+      return AccessResult::forbidden((string) t('Field is mapped by the importer'));
+    }
+  }
+
+  return AccessResult::neutral();
 }
 
 /**
