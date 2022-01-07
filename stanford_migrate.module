@@ -54,7 +54,7 @@ function stanford_migrate_get_migration(NodeInterface $node) {
   if (!is_null($node_migration)) {
     return $node_migration;
   }
-  // Se the static to false and check for null above. If the first attempt to
+  // Set the static to false and check for null above. If the first attempt to
   // find a migration doesn't show anything, we don't want to continue checking.
   $node_migration = FALSE;
 
