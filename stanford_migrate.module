@@ -15,6 +15,7 @@ use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\migrate\Exception\RequirementsException;
 use Drupal\migrate\MigrateMessage;
+use Drupal\migrate\Plugin\MigrateIdMapInterface;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\migrate\Plugin\RequirementsInterface;
 use Drupal\migrate_plus\Entity\Migration;
@@ -83,7 +84,8 @@ function stanford_migrate_get_migration(NodeInterface $node) {
       // If the migrate id map returns something, that means this node is tied
       // to this migration. Set the static variable for later references and
       // get out of here.
-      if (!empty($migrate->getIdMap()->lookupSourceId(['nid' => $node->id()]))) {
+      $row_data = $migrate->getIdMap()->getRowByDestination(['nid' => $node->id()]);
+      if (!empty($row_data) && $row_data['source_row_status'] != MigrateIdMapInterface::STATUS_IGNORED) {
         $node_migration = $migration;
         return $migration;
       }
@@ -112,6 +114,25 @@ function stanford_migrate_entity_field_access($operation, FieldDefinitionInterfa
     // the field.
     foreach (array_keys($columns) as $column) {
       $processing = $processing ?: !empty($migration->process["$field_name/$column"]);
+    }
+
+    // If the migration destination has the `overwrite_properties` configured,
+    // those fields specifically should be locked, not the other fields that
+    // are not designated in the original process configuration.
+    if ($processing && !empty($migration->get('destination')['overwrite_properties'])) {
+      // If the current field doesn't exist in the overwrite_properties, it
+      // should not be considered to be processing since it's a one time only
+      // import.
+      $processing = FALSE;
+
+      foreach ($migration->get('destination')['overwrite_properties'] as $overwrite_property) {
+        // If any part of the field is set to overwrite, lock the whole field
+        // down.
+        $overwrite_property = strstr($overwrite_property, '/', TRUE) ?: $overwrite_property;
+        if ($field_name == $overwrite_property) {
+          $processing = TRUE;
+        }
+      }
     }
 
     if ($processing) {

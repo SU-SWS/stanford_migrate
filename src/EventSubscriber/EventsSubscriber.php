@@ -7,7 +7,9 @@ use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\migrate\Event\MigrateEvents;
 use Drupal\migrate\Event\MigrateImportEvent;
+use Drupal\migrate\Plugin\MigrateIdMapInterface;
 use Drupal\migrate\Plugin\MigrationInterface;
+use Drupal\migrate\Row;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 
@@ -27,6 +29,11 @@ class EventsSubscriber implements EventSubscriberInterface {
    * If the migration is configured to unpublish orphans.
    */
   const ORPHAN_UNPUBLISH = 'unpublish';
+
+  /**
+   * If the migration is configured to unpublish orphans.
+   */
+  const ORPHAN_FORGET = 'forget';
 
   /**
    * Drupal\Core\Entity\EntityTypeManagerInterface definition.
@@ -118,11 +125,20 @@ class EventsSubscriber implements EventSubscriberInterface {
       $id_exists_in_source = FALSE;
       // Source key array of the already imported item.
       $source_id = $id_map->currentSource();
+      $row = $id_map->getRowBySource($source_id);
+
+      // The current item is already ignored, lets move on to the next one. This
+      // is skipped if the migration is ran with `--update` or via the UI with
+      // the "Update" checkbox checked.
+      if ($row['source_row_status'] == MigrateIdMapInterface::STATUS_IGNORED) {
+        $id_map->next();
+        continue;
+      }
 
       // Look through the current source to see if we can find a match to the
       // existing item.
       foreach ($current_source_ids as $key => $ids) {
-        if ($ids == $source_id) {
+        if (md5(json_encode($ids)) == md5(json_encode($source_id))) {
           // The existing item is in the source, flag it as found and we can
           // reduce the current source ids to make subsequent lookups faster.
           unset($current_source_ids[$key]);
@@ -167,6 +183,17 @@ class EventsSubscriber implements EventSubscriberInterface {
             // Delete the entity, then the record in the id map.
             $entity->delete();
             $id_map->delete($id_map->currentSource());
+            break;
+
+          // Tell the migration to ignore the given source ids.
+          case self::ORPHAN_FORGET:
+            $this->logger->notice($this->t('Entity since it no longer exists in the source data, it will be now be ignored. Migration: @migration, Entity Type: @entity_type, Label: @label'), [
+              '@migration' => $event->getMigration()->label(),
+              '@entity_type' => $type,
+              '@label' => $entity->label(),
+            ]);
+            $old_row = new Row($id_map->currentSource(), $id_map->currentSource(), TRUE);
+            $id_map->saveIdMapping($old_row, [], MigrateIdMapInterface::STATUS_IGNORED);
             break;
 
           case self::ORPHAN_UNPUBLISH:
