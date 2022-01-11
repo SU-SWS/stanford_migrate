@@ -3,6 +3,7 @@
 namespace Drupal\Tests\stanford_migrate\Kernel\EventSubscriber;
 
 use Drupal\migrate\MigrateExecutable;
+use Drupal\migrate\Plugin\MigrateIdMapInterface;
 use Drupal\Tests\stanford_migrate\Kernel\StanfordMigrateKernelTestBase;
 
 class EventsSubscriberTest extends StanfordMigrateKernelTestBase {
@@ -24,10 +25,10 @@ class EventsSubscriberTest extends StanfordMigrateKernelTestBase {
   public function testEventSubscriber() {
     $migrate = $this->getMigrateExecutable();
     $this->assertEquals(1, $migrate->import());
-    $this->assertEqual(1, $this->getNodeCount());
+    $this->assertEquals(1, $this->getNodeCount());
 
     $migrate->import();
-    $this->assertEqual(1, $this->getNodeCount());
+    $this->assertEquals(1, $this->getNodeCount());
   }
 
   /**
@@ -36,7 +37,7 @@ class EventsSubscriberTest extends StanfordMigrateKernelTestBase {
   public function testDeleteAction() {
     $migrate = $this->getMigrateExecutable();
     $migrate->import();
-    $this->assertEqual(1, $this->getNodeCount());
+    $this->assertEquals(1, $this->getNodeCount());
     \Drupal::configFactory()
       ->getEditable('migrate_plus.migration.stanford_migrate')
       ->set('source.urls', [])
@@ -47,7 +48,7 @@ class EventsSubscriberTest extends StanfordMigrateKernelTestBase {
 
     $migrate = $this->getMigrateExecutable();
     $migrate->import();
-    $this->assertEqual(0, $this->getNodeCount());
+    $this->assertEquals(0, $this->getNodeCount());
   }
 
   /**
@@ -56,7 +57,7 @@ class EventsSubscriberTest extends StanfordMigrateKernelTestBase {
   public function testUnpublishAction() {
     $migrate = $this->getMigrateExecutable();
     $migrate->import();
-    $this->assertEqual(1, $this->getNodeCount());
+    $this->assertEquals(1, $this->getNodeCount());
     \Drupal::configFactory()
       ->getEditable('migrate_plus.migration.stanford_migrate')
       ->set('source.urls', [__DIR__ . '/../test2.xml'])
@@ -67,12 +68,50 @@ class EventsSubscriberTest extends StanfordMigrateKernelTestBase {
 
     $migrate = $this->getMigrateExecutable();
     $migrate->import();
-    $this->assertEqual(2, $this->getNodeCount());
+    $this->assertEquals(2, $this->getNodeCount());
 
     $unpublished_nodes = \Drupal::entityTypeManager()
       ->getStorage('node')
       ->loadByProperties(['status' => 0]);
     $this->assertCount(1, $unpublished_nodes);
+  }
+
+  /**
+   * Forget Orphan action test.
+   */
+  public function testForgetAction() {
+    $migrate = $this->getMigrateExecutable();
+    $migrate->import();
+    $this->assertEquals(1, $this->getNodeCount());
+    \Drupal::configFactory()
+      ->getEditable('migrate_plus.migration.stanford_migrate')
+      ->set('source.urls', [__DIR__ . '/../test2.xml'])
+      ->set('source.orphan_action', 'forget')
+      ->save();
+
+    drupal_flush_all_caches();
+
+    $migrate = $this->getMigrateExecutable();
+    $migrate->import();
+    $this->assertEquals(2, $this->getNodeCount());
+
+    $manager = \Drupal::service('plugin.manager.migration');
+    /** @var \Drupal\migrate\Plugin\Migration $migration */
+    $migration = $manager->createInstance('stanford_migrate');
+    $id_map = $migration->getIdMap();
+    $id_map->rewind();
+
+    $number_ignored = 0;
+    while ($id_map->current()) {
+      $row = $id_map->getRowBySource($id_map->currentSource());
+      if ($row['source_row_status'] == MigrateIdMapInterface::STATUS_IGNORED) {
+        $number_ignored++;
+      }
+      $id_map->next();;
+    }
+    $this->assertGreaterThanOrEqual(2, $id_map->processedCount());
+    $this->assertGreaterThanOrEqual(1, $number_ignored);
+    $this->assertNotEquals($number_ignored, $id_map->processedCount());
   }
 
   /**
