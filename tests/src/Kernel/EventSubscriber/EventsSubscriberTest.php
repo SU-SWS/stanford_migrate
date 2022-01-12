@@ -93,6 +93,9 @@ class EventsSubscriberTest extends StanfordMigrateKernelTestBase {
 
     $migrate = $this->getMigrateExecutable();
     $migrate->import();
+    drupal_flush_all_caches();
+    $migrate->import();
+    $migrate->import();
     $this->assertEquals(2, $this->getNodeCount());
 
     $manager = \Drupal::service('plugin.manager.migration');
