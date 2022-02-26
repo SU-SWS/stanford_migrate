@@ -5,14 +5,12 @@
  * Contains stanford_migrate.module.
  */
 
-use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Installer\InstallerKernel;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\migrate\Exception\RequirementsException;
 use Drupal\migrate\MigrateMessage;
 use Drupal\migrate\Plugin\MigrateIdMapInterface;
@@ -95,18 +93,30 @@ function stanford_migrate_get_migration(NodeInterface $node) {
 }
 
 /**
- * Implements hook_entity_field_access().
+ * Implements hook_entity_form_display_alter().
  */
-function stanford_migrate_entity_field_access($operation, FieldDefinitionInterface $field_definition, AccountInterface $account, FieldItemListInterface $items = NULL) {
-  $route_match = \Drupal::routeMatch();
-  // When edit an existing node that was imported via migrate module, mark the
-  // fields that are mapped from migration as forbidden.
-  if (
-    $operation == 'edit' &&
-    $route_match->getRouteName() == 'entity.node.edit_form' &&
-    $migration = stanford_migrate_get_migration($route_match->getParameter('node'))
-  ) {
-    $field_name = $field_definition->getName();
+function stanford_migrate_entity_form_display_alter(EntityFormDisplayInterface $form_display, array $context) {
+  if ($context['entity_type'] != 'node') {
+    return;
+  }
+  $node = \Drupal::routeMatch()->getParameter('node');
+  $migration = stanford_migrate_get_migration($node);
+  // Check if the current node was imported.
+  if (!$migration) {
+    return;
+  }
+  $default_display = EntityViewDisplay::load("node.{$node->bundle()}.default");
+
+  $field_definitions = $form_display->get('fieldDefinitions');
+  foreach ($form_display->getComponents() as $field_name => $component) {
+
+    if (empty($field_definitions[$field_name])) {
+      continue;
+    }
+    $field_definition = $field_definitions[$field_name];
+
+    // When edit an existing node that was imported via migrate module, mark the
+    // fields that are mapped from migration as forbidden.
     $columns = $field_definition->getFieldStorageDefinition()->getColumns();
     $processing = !empty($migration->process[$field_name]);
 
@@ -139,11 +149,16 @@ function stanford_migrate_entity_field_access($operation, FieldDefinitionInterfa
       \Drupal::messenger()
         ->addWarning(t('Some fields can not be edited since they contain imported & synced data. They are not visible here.'));
 
-      return AccessResult::forbidden((string) t('Field is mapped by the importer'));
+      // If the default display is configured with some settings, let's use that
+      // for the best display on the entity form.
+      if ($display_component = $default_display->getComponent($field_name)) {
+        $component['settings']['formatter_type'] = $display_component['type'];
+        $component['settings']['formatter_settings'] = $display_component['settings'];
+      }
+      $component['type'] = 'readonly_field_widget';
+      $form_display->setComponent($field_name, $component);
     }
   }
-
-  return AccessResult::neutral();
 }
 
 /**

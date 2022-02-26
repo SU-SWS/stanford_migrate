@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * stanford_migrate.install
+ */
+
+/**
+ * Install readonly_field_widget module.
+ */
+function stanford_migrate_update_8001(){
+  \Drupal::service('module_installer')->install(['readonly_field_widget']);
+}

@@ -8,4 +8,5 @@ dependencies:
   - drupal:migrate
   - migrate_plus:migrate_plus
   - migrate_tools:migrate_tools
+  - readonly_field_widget:readonly_field_widget
   - ultimate_cron:ultimate_cron
