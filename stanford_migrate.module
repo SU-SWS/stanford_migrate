@@ -333,7 +333,8 @@ function stanford_migrate_ultimate_cron_task(CronJobInterface $cron_entity) {
   if ($migration_group && !empty($migrations[$migration_group])) {
     try {
       array_walk($migrations[$migration_group], 'stanford_migrate_execute_migration');
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
 
       // Log any errors that we encounter.
       $logger->error('Unable to run migration importer: @group @message', [
@@ -389,7 +390,8 @@ function stanford_migrate_execute_migration(MigrationInterface $migration, $migr
     $executable = new MigrateExecutable($migration, $log, $options);
     $executable->import();
     $executed_migrations[$migration_id] = $migration_id;
-  } catch (Exception $e) {
+  }
+  catch (Exception $e) {
     \Drupal::logger('stanford_migrate')
       ->critical('Unable to execute importer @id: @message', [
         '@id' => $migration_id,
@@ -426,7 +428,8 @@ function stanford_migrate_migration_list() {
       }
       try {
         $migration->getSourcePlugin()->checkRequirements();
-      } catch (RequirementsException $e) {
+      }
+      catch (RequirementsException $e) {
         \Drupal::logger('stanford_migrate')
           ->error('Unable to execute migration @name: @message', [
             '@name' => $migration->label(),
