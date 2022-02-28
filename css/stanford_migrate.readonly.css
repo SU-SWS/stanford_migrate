@@ -1,0 +1,5 @@
+.messages.messages--readonly {
+  background-color: transparent;
+  border-color: #ccc;
+  color: inherit;
+}
