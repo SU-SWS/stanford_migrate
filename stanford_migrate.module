@@ -103,10 +103,11 @@ function stanford_migrate_get_migration(NodeInterface $node) {
 function stanford_migrate_entity_form_display_alter(EntityFormDisplayInterface $form_display, array $context) {
   // We only care about nodes, but this could be expanded later if more entities
   // are imported.
-  if ($context['entity_type'] != 'node') {
+  $node = \Drupal::routeMatch()->getParameter('node');
+  if ($context['entity_type'] != 'node' || !$node) {
     return;
   }
-  $node = \Drupal::routeMatch()->getParameter('node');
+
   $migration = stanford_migrate_get_migration($node);
   // Check if the current node was imported.
   if (!$migration) {
