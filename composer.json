@@ -16,11 +16,11 @@
     "require": {
         "drupal/migrate_file": "^2.0",
         "drupal/migrate_plus": "^5.0",
-        "drupal/migrate_tools": "^5.0",
-        "drupal/ultimate_cron": "^2.0@alpha",
         "drupal/migrate_source_csv": "^3.4",
-        "joshfraser/php-name-parser": "dev-master",
-        "drupal/readonly_field_widget": "^1.4"
+        "drupal/migrate_tools": "^5.0",
+        "drupal/readonly_field_widget": "^1.4",
+        "drupal/ultimate_cron": "^2.0@alpha",
+        "joshfraser/php-name-parser": "dev-master"
     },
     "extra": {
         "patches": {
@@ -29,6 +29,9 @@
                 "https://www.drupal.org/project/migrate_plus/issues/3050058": "https://www.drupal.org/files/issues/2022-01-03/3050058-9-item-selector-missing.patch"
             }
         }
+    },
+    "config": {
+        "sort-packages": true
     },
     "autoload": {
         "psr-4": {
