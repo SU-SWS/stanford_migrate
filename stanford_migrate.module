@@ -59,16 +59,20 @@ function stanford_migrate_get_migration(NodeInterface $node) {
 
   $plugin_manager = \Drupal::service('plugin.manager.migration');
 
+  // Load only migrations that are enabled.
+  $migrations = \Drupal::entityTypeManager()
+    ->getStorage('migration')
+    ->loadByProperties(['status' => 1]);
+
   // Loop through the migration entities, build their migration plugins so that
   // we can dig into their source mapping data.
   /** @var \Drupal\migrate_plus\Entity\MigrationInterface $migration */
-  foreach (Migration::loadMultiple() as $migration) {
+  foreach ($migrations as $migration) {
 
     // This migrate entity has methods that allow easy queries on the
     // migrate_map tables.
     /** @var \Drupal\migrate\Plugin\MigrationInterface $migrate */
     $migrate = $plugin_manager->createInstance($migration->id());
-
     // CSV Imported content can be ignored since it's normally a one time thing.
     if (!$migrate || $migrate->getSourcePlugin()->getPluginId() == 'csv') {
       continue;
