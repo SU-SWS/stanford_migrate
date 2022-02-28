@@ -82,7 +82,8 @@ function stanford_migrate_get_migration(NodeInterface $node) {
       // If the migrate id map returns something, that means this node is tied
       // to this migration. Set the static variable for later references and
       // get out of here.
-      $row_data = $migrate->getIdMap()->getRowByDestination(['nid' => $node->id()]);
+      $row_data = $migrate->getIdMap()
+        ->getRowByDestination(['nid' => $node->id()]);
       if (!empty($row_data) && $row_data['source_row_status'] != MigrateIdMapInterface::STATUS_IGNORED) {
         $node_migration = $migration;
         return $migration;
@@ -96,6 +97,8 @@ function stanford_migrate_get_migration(NodeInterface $node) {
  * Implements hook_entity_form_display_alter().
  */
 function stanford_migrate_entity_form_display_alter(EntityFormDisplayInterface $form_display, array $context) {
+  // We only care about nodes, but this could be expanded later if more entities
+  // are imported.
   if ($context['entity_type'] != 'node') {
     return;
   }
@@ -105,18 +108,21 @@ function stanford_migrate_entity_form_display_alter(EntityFormDisplayInterface $
   if (!$migration) {
     return;
   }
+
+  // Grab the default display settings for use later.
   $default_display = EntityViewDisplay::load("node.{$node->bundle()}.default");
 
   $field_definitions = $form_display->get('fieldDefinitions');
   foreach ($form_display->getComponents() as $field_name => $component) {
 
+    // Make sure the field component is one of the field definitions.
     if (empty($field_definitions[$field_name])) {
       continue;
     }
-    $field_definition = $field_definitions[$field_name];
 
     // When edit an existing node that was imported via migrate module, mark the
-    // fields that are mapped from migration as forbidden.
+    // fields that are mapped from migration as readonly.
+    $field_definition = $field_definitions[$field_name];
     $columns = $field_definition->getFieldStorageDefinition()->getColumns();
     $processing = !empty($migration->process[$field_name]);
 
@@ -149,7 +155,9 @@ function stanford_migrate_entity_form_display_alter(EntityFormDisplayInterface $
       \Drupal::messenger()
         ->addWarning(t('Some fields can not be edited since they contain imported & synced data.'));
 
-      // If the default display is configured with some settings, let's use that      // for the best display on the entity form.
+      // If the default display is configured with some settings, let's use that
+      // for the best display on the entity form. If it's not configured, the
+      // readonly_field_widget module will use some default display settings.
       if ($display_component = $default_display->getComponent($field_name)) {
         $component['settings']['formatter_type'] = $display_component['type'];
         $component['settings']['formatter_settings'] = $display_component['settings'];
@@ -325,8 +333,7 @@ function stanford_migrate_ultimate_cron_task(CronJobInterface $cron_entity) {
   if ($migration_group && !empty($migrations[$migration_group])) {
     try {
       array_walk($migrations[$migration_group], 'stanford_migrate_execute_migration');
-    }
-    catch (Exception $e) {
+    } catch (Exception $e) {
 
       // Log any errors that we encounter.
       $logger->error('Unable to run migration importer: @group @message', [
@@ -382,8 +389,7 @@ function stanford_migrate_execute_migration(MigrationInterface $migration, $migr
     $executable = new MigrateExecutable($migration, $log, $options);
     $executable->import();
     $executed_migrations[$migration_id] = $migration_id;
-  }
-  catch (Exception $e) {
+  } catch (Exception $e) {
     \Drupal::logger('stanford_migrate')
       ->critical('Unable to execute importer @id: @message', [
         '@id' => $migration_id,
@@ -420,8 +426,7 @@ function stanford_migrate_migration_list() {
       }
       try {
         $migration->getSourcePlugin()->checkRequirements();
-      }
-      catch (RequirementsException $e) {
+      } catch (RequirementsException $e) {
         \Drupal::logger('stanford_migrate')
           ->error('Unable to execute migration @name: @message', [
             '@name' => $migration->label(),
