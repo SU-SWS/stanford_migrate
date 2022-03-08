@@ -15,8 +15,6 @@ class StanfordSql extends Sql {
   public function getRowByDestination(array $destination_id_values) {
     $query = $this->getDatabase()->select($this->mapTableName(), 'map')
       ->fields('map');
-
-    $conditions = [];
     foreach ($this->destinationIdFields() as $field_name => $destination_id) {
       if (!isset($destination_id_values[$field_name])) {
         // In the parent class, if the destination id values doesn't include
@@ -24,16 +22,10 @@ class StanfordSql extends Sql {
         // whatever values & conditions we can.
         continue;
       }
-      $conditions["map.$destination_id"] = $destination_id_values[$field_name];
+      $query->condition("map.$destination_id", $destination_id_values[$field_name], '=');
     }
-    if (empty($conditions)) {
-      return [];
-    }
-    foreach ($conditions as $key => $value) {
-      $query->condition($key, $value, '=');
-    }
-    $result = $query->execute()->fetchAssoc();
-    return $result ? $result : [];
+    return count($query->conditions()) > 1 ?
+      $query->execute()->fetchAssoc() : [];
   }
 
 }
