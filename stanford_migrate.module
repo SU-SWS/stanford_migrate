@@ -254,6 +254,13 @@ function stanford_migrate_migration_delete(Migration $entity) {
 }
 
 /**
+ * Implements hook_migrate_id_map_info_alter().
+ */
+function stanford_migrate_migrate_id_map_info_alter(&$definitions) {
+  $definitions['sql']['class'] = '\Drupal\stanford_migrate\Plugin\migrate\id_map\StanfordSql';
+}
+
+/**
  * Implements hook_migrate_source_info_alter().
  */
 function stanford_migrate_migrate_source_info_alter(array &$definitions) {
