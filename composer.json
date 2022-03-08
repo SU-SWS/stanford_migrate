@@ -22,6 +22,9 @@
         "drupal/ultimate_cron": "^2.0@alpha",
         "joshfraser/php-name-parser": "dev-master"
     },
+    "require-dev": {
+        "drupal/entity_reference_revisions": "^1.9"
+    },
     "extra": {
         "patches": {
             "drupal/migrate_plus": {
