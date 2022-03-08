@@ -15,6 +15,7 @@ abstract class StanfordMigrateKernelTestBase extends KernelTestBase {
    */
   protected static $modules = [
     'test_stanford_migrate',
+    'entity_reference_revisions',
     'stanford_migrate',
     'migrate_plus',
     'migrate',
