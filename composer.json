@@ -15,7 +15,7 @@
     ],
     "require": {
         "drupal/migrate_file": "^2.0",
-        "drupal/migrate_plus": "^5.2",
+        "drupal/migrate_plus": "^5.2.0",
         "drupal/migrate_source_csv": "^3.4",
         "drupal/migrate_tools": "^5.0",
         "drupal/readonly_field_widget": "^1.4",
