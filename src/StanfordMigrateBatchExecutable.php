@@ -19,7 +19,7 @@ class StanfordMigrateBatchExecutable extends MigrateBatchExecutable {
   /**
    * {@inheritdoc}
    */
-  public function batchImport() {
+  public function batchImport(): void {
     // Create the batch operations for each migration that needs to be executed.
     // This includes the migration for this executable, but also the dependent
     // migrations.
@@ -46,7 +46,7 @@ class StanfordMigrateBatchExecutable extends MigrateBatchExecutable {
   /**
    * {@inheritdoc}
    */
-  protected function batchOperations(array $migrations, $operation, array $options = []) {
+  protected function batchOperations(array $migrations, $operation, array $options = []): array {
     array_walk($migrations, [$this, 'prepareMigrations']);
     $operations = parent::batchOperations($migrations, $operation, $options);
     foreach ($operations as &$operation) {
@@ -77,7 +77,7 @@ class StanfordMigrateBatchExecutable extends MigrateBatchExecutable {
   /**
    * {@inheritdoc}
    */
-  public static function batchProcessImport($migration_id, array $options, &$context) {
+  public static function batchProcessImport($migration_id, array $options, &$context): void {
     if (empty($context['sandbox'])) {
       $context['finished'] = 0;
       $context['sandbox'] = [];
