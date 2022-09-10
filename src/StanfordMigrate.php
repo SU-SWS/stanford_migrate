@@ -148,10 +148,6 @@ class StanfordMigrate implements StanfordMigrateInterface {
     // Do not return any migrations which fail to meet requirements.
     foreach ($matched_migrations as $id => $migration) {
       if ($migration->getSourcePlugin() instanceof RequirementsInterface) {
-        // Status might not be set on the entity so check for it first.
-        if (isset($migration->status) && !$migration->status) {
-          continue;
-        }
         try {
           $migration->getSourcePlugin()->checkRequirements();
         }

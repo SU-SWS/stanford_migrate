@@ -154,16 +154,6 @@ function stanford_migrate_config_readonly_whitelist_patterns() {
 }
 
 /**
- * Implements hook_config_schema_info_alter().
- */
-function stanford_migrate_config_schema_info_alter(&$definitions) {
-  $definitions['migrate_plus.migration.*']['mapping']['status'] = [
-    'type' => 'boolean',
-    'label' => 'Active',
-  ];
-}
-
-/**
  * Migration callback to just get the current timestamp.
  *
  * We use this function in migration callback processes because using `time` as
