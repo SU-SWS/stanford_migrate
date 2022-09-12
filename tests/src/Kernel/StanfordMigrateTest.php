@@ -24,48 +24,70 @@ class StanfordMigrateTest extends StanfordMigrateKernelTestBase {
   }
 
   /**
-   * Test various parts of the service.
+   * Test importer service methods and node lookup.
    */
-  public function testServiceMethods() {
-    $migration = Migration::load('stanford_migrate');
-
-    $disabled_migration = $migration->createDuplicate();
-    $disabled_migration->set('id', 'disabled_migration')
-      ->set('status', false)
-      ->save();
-
+  public function testImporter() {
     $this->assertCount(0, Node::loadMultiple());
-
     /** @var \Drupal\stanford_migrate\StanfordMigrateInterface $service */
     $service = \Drupal::service('stanford_migrate');
-    $migration_list = $service->getMigrationList();
-    $this->assertArrayHasKey('stanford_migrate', $migration_list['stanford_migrate']);
-    $this->assertArrayNotHasKey('disabled_migration', $migration_list['stanford_migrate']);
-
     $service->executeMigrationId('stanford_migrate');
+
     $nodes = Node::loadMultiple();
     $this->assertCount(1, $nodes);
 
-    $this->assertEquals('stanford_migrate', $service->getNodesMigration(reset($nodes))->id());
-    $this->assertEquals('stanford_migrate', $service->getNodesMigration(reset($nodes))->id());
+    // Run it twice to cover the static variable.
+    $service->getNodesMigration(reset($nodes))
+    $migration = $service->getNodesMigration(reset($nodes));
+    $this->assertEquals('stanford_migrate', $migration->id());
 
     $unrelated_node = Node::create(['type' => 'article', 'title' => 'Foo Bar']);
     $unrelated_node->save();
     $this->assertNull($service->getNodesMigration($unrelated_node));
     $unrelated_node->delete();
+  }
 
+  /**
+   * Test the migration list method.
+   */
+  public function testMigrationList() {
+    $migration = Migration::load('stanford_migrate');
+
+    $disabled_migration = $migration->createDuplicate();
+    $disabled_migration->set('id', 'disabled_migration')
+      ->set('status', FALSE)
+      ->save();
+
+    $this->assertCount(0, Node::loadMultiple());
+
+    $migration_list = \Drupal::service('stanford_migrate')->getMigrationList();
+    $this->assertArrayHasKey('stanford_migrate', $migration_list['stanford_migrate']);
+    $this->assertArrayNotHasKey('disabled_migration', $migration_list['stanford_migrate']);
+
+    $disabled_migration->set('status', TRUE)->save();
+    drupal_flush_all_caches();
+
+    $migration_list = \Drupal::service('stanford_migrate')->getMigrationList();
+    $this->assertArrayHasKey('stanford_migrate', $migration_list['stanford_migrate']);
+    $this->assertArrayHasKey('disabled_migration', $migration_list['stanford_migrate']);
+  }
+
+  /**
+   * Deleting an entity will remove it from the migration map table.
+   */
+  public function testEntityDelete() {
+    \Drupal::service('stanford_migrate')
+      ->executeMigrationId('stanford_migrate');
     $map_count = \Drupal::database()
       ->select('migrate_map_stanford_migrate', 'm')
       ->fields('m')
       ->countQuery()
       ->execute()
       ->fetchField();
-    $this->assertEquals(count($nodes), $map_count);
+    $this->assertEquals(1, $map_count);
 
-    foreach ($nodes as $node) {
+    foreach (Node::loadMultiple() as $node) {
       $node->delete();
     }
-    $this->assertCount(0, Node::loadMultiple());
     $map_count = \Drupal::database()
       ->select('migrate_map_stanford_migrate', 'm')
       ->fields('m')
@@ -73,6 +95,13 @@ class StanfordMigrateTest extends StanfordMigrateKernelTestBase {
       ->execute()
       ->fetchField();
     $this->assertEquals(0, $map_count);
+  }
+
+  /**
+   * Test running a dependent migration before the called migraiton.
+   */
+  public function testDependentMigration() {
+    $migration = Migration::load('stanford_migrate');
 
     $dependent_migration = $migration->createDuplicate();
     $dependent_migration->set('id', 'cloned_migration')
@@ -87,6 +116,24 @@ class StanfordMigrateTest extends StanfordMigrateKernelTestBase {
       ->executeMigrationId('stanford_migrate');
 
     $this->assertCount(2, Node::loadMultiple());
+  }
+
+  /**
+   * Batch importers work similarly.
+   */
+  public function testBatchExecution() {
+    $this->assertCount(0, Node::loadMultiple());
+
+    /** @var \Drupal\stanford_migrate\StanfordMigrateInterface $service */
+    $service = \Drupal::service('stanford_migrate');
+    $service->setBatchExecution(TRUE)
+      ->executeMigrationId('stanford_migrate');
+
+    $batch = &batch_get();
+    $batch['progressive'] = FALSE;
+    batch_process();
+
+    $this->assertCount(1, Node::loadMultiple());
   }
 
 }
