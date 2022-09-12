@@ -108,30 +108,19 @@ class StanfordMigrate implements StanfordMigrateInterface {
     }
 
     // Finally run this migration.
-    try {
-      $log = new MigrateMessage();
 
-      if ($this->batchExecuteMigrations) {
-        $executable = new StanfordMigrateBatchExecutable($migration, $log, $options);
-        $executable->batchImport();
-      }
-      else {
-        $executable = new MigrateExecutable($migration, $log, $options);
-        $executable->import();
-      }
+    $log = new MigrateMessage();
 
-      $executed_migrations[$migration_id] = $migration_id;
+    if ($this->batchExecuteMigrations) {
+      $executable = new StanfordMigrateBatchExecutable($migration, $log, $options);
+      $executable->batchImport();
     }
-    catch (\Exception $e) {
-      $this->logger->critical('Unable to execute importer @id: @message', [
-        '@id' => $migration_id,
-        '@message' => $e->getMessage(),
-      ]);
-      $this->messenger()
-        ->addError(t('Unable to execute importer @id: @message. View logs to see more information.', [
-          '@id' => $migration_id,
-        ]));
+    else {
+      $executable = new MigrateExecutable($migration, $log, $options);
+      $executable->import();
     }
+
+    $executed_migrations[$migration_id] = $migration_id;
   }
 
   /**
@@ -194,7 +183,6 @@ class StanfordMigrate implements StanfordMigrateInterface {
     // find a migration doesn't show anything, we don't want to continue
     // checking.
     $node_migration = FALSE;
-
 
     $migrations = $this->getMigrationEntities();
 

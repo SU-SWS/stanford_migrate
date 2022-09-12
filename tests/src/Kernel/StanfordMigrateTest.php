@@ -46,8 +46,8 @@ class StanfordMigrateTest extends StanfordMigrateKernelTestBase {
     $nodes = Node::loadMultiple();
     $this->assertCount(1, $nodes);
 
-    $nodes_migration = $service->getNodesMigration(reset($nodes));
-    $this->assertEquals('stanford_migrate', $nodes_migration->id());
+    $this->assertEquals('stanford_migrate', $service->getNodesMigration(reset($nodes))->id());
+    $this->assertEquals('stanford_migrate', $service->getNodesMigration(reset($nodes))->id());
 
     $unrelated_node = Node::create(['type' => 'article', 'title' => 'Foo Bar']);
     $unrelated_node->save();
