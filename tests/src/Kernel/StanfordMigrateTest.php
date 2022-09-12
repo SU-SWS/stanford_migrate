@@ -47,6 +47,7 @@ class StanfordMigrateTest extends StanfordMigrateKernelTestBase {
     $unrelated_node = Node::create(['type' => 'article', 'title' => 'Foo Bar']);
     $unrelated_node->save();
     $this->assertNull($service->getNodesMigration($unrelated_node));
+    $this->assertNull($service->getNodesMigration($unrelated_node));
     $unrelated_node->delete();
   }
 

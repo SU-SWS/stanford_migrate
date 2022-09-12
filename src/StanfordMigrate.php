@@ -177,7 +177,10 @@ class StanfordMigrate implements StanfordMigrateInterface {
     $node_migration = &drupal_static(__CLASS__ . __FUNCTION__ . '_' . $node->id());
 
     if (!is_null($node_migration)) {
-      return $node_migration;
+      // If the given node was previously looked up, but it doesn't exist from a
+      // migration, it's value will be false. But we have to return NULL due to
+      // the return type declaration.
+      return $node_migration ?: NULL;
     }
     // Set the static to false and check for null above. If the first attempt to
     // find a migration doesn't show anything, we don't want to continue
