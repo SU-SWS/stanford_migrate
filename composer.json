@@ -24,7 +24,8 @@
         "joshfraser/php-name-parser": "dev-master"
     },
     "require-dev": {
-        "drupal/entity_reference_revisions": "^1.9"
+        "drupal/entity_reference_revisions": "^1.9",
+        "drupal/coder": "*"
     },
     "extra": {
         "patches": {
