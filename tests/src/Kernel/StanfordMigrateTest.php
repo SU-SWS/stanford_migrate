@@ -2,6 +2,10 @@
 
 namespace Drupal\Tests\stanford_migrate\Kernel;
 
+use Drupal\migrate\Exception\RequirementsException;
+use Drupal\migrate\Plugin\MigrationInterface;
+use Drupal\migrate\Plugin\MigrationPluginManagerInterface;
+use Drupal\migrate\Plugin\RequirementsInterface;
 use Drupal\migrate_plus\Entity\Migration;
 use Drupal\node\Entity\Node;
 
@@ -134,6 +138,26 @@ class StanfordMigrateTest extends StanfordMigrateKernelTestBase {
     batch_process();
 
     $this->assertCount(1, Node::loadMultiple());
+  }
+
+  /**
+   * Test a migration plugin that fails to check for requirements.
+   */
+  public function testRequirementCheck() {
+    $source_plugin = $this->createMock(RequirementsInterface::class);
+    $source_plugin->method('checkRequirements')
+      ->willThrowException(new RequirementsException());
+
+    $migration = $this->createMock(MigrationInterface::class);
+    $migration->method('getSourcePlugin')->willReturn($source_plugin);
+
+    $plugin_manager = $this->createMock(MigrationPluginManagerInterface::class);
+    $plugin_manager->method('createInstances')->willReturn([$migration]);
+    \Drupal::getContainer()->set('plugin.manager.migration', $plugin_manager);
+
+    /** @var \Drupal\stanford_migrate\StanfordMigrateInterface $service */
+    $service = \Drupal::service('stanford_migrate');
+    $this->assertEmpty($service->getMigrationList());
   }
 
 }
