@@ -36,7 +36,7 @@ class StanfordMigrateTest extends StanfordMigrateKernelTestBase {
     $this->assertCount(1, $nodes);
 
     // Run it twice to cover the static variable.
-    $service->getNodesMigration(reset($nodes))
+    $service->getNodesMigration(reset($nodes));
     $migration = $service->getNodesMigration(reset($nodes));
     $this->assertEquals('stanford_migrate', $migration->id());
 
