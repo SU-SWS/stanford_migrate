@@ -1,7 +1,7 @@
 services:
   stanford_migrate:
     class: Drupal\stanford_migrate\StanfordMigrate
-    arguments: [ '@entity_type.manager', '@plugin.manager.migration', '@logger.factory' ]dru
+    arguments: [ '@entity_type.manager', '@plugin.manager.migration', '@logger.factory' ]
   stanford_migrate.event_subscriber:
     class: Drupal\stanford_migrate\EventSubscriber\EventsSubscriber
     arguments: ['@entity_type.manager', '@logger.factory', '@cache.default']
