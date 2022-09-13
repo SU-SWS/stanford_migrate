@@ -21,7 +21,6 @@ jobs:
         env:
           # Change to false to only validate changed files.
           VALIDATE_ALL_CODEBASE: true
-          VALIDATE_PHP_PSALM: false
           DEFAULT_BRANCH: master
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FILTER_REGEX_EXCLUDE: 'tests.*'
