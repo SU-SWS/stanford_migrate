@@ -2,6 +2,7 @@
 
 <ruleset name="super-linter">
   <description>The default coding standard for usage with GitHub Super-Linter. It just includes PSR12.</description>
-  <rule ref="../../vendor/drupal/coder/coder_sniffer/Drupal/ruleset.xml" />
-  <rule ref="../../vendor/drupal/coder/coder_sniffer/DrupalPractice/ruleset.xml" />
+  <autoload>../../vendor/autoload.php</autoload>
+  <rule ref="Drupal" />
+  <rule ref="DrupalPractice" />
 </ruleset>
