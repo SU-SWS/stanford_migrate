@@ -11,3 +11,10 @@
 function stanford_migrate_update_8001() {
   \Drupal::service('module_installer')->install(['readonly_field_widget']);
 }
+
+/**
+ * Install empty_field module.
+ */
+function stanford_migrate_update_8002() {
+  \Drupal::service('module_installer')->install(['empty_field']);
+}

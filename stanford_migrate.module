@@ -115,6 +115,11 @@ function stanford_migrate_entity_form_display_alter(EntityFormDisplayInterface $
       if ($display_component = $default_display->getComponent($field_name)) {
         $component['settings']['formatter_type'] = $display_component['type'];
         $component['settings']['formatter_settings'] = $display_component['settings'];
+        $component['settings']['formatter_third_party_settings'] = $display_component['third_party_settings'] ?? [];
+
+        // Add the empty fields module settings to display a message.
+        $component['settings']['formatter_third_party_settings']['empty_fields']['handler'] = 'text';
+        $component['settings']['formatter_third_party_settings']['empty_fields']['settings']['empty_text'] = '<em>' . t('No Data') . '</em>';
       }
       $component['type'] = 'readonly_field_widget';
       $form_display->setComponent($field_name, $component);
