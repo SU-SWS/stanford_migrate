@@ -3,6 +3,7 @@
 namespace Drupal\stanford_migrate;
 
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\migrate\Plugin\MigrationPluginManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -17,24 +18,20 @@ class StanfordMigratePermissions implements ContainerInjectionInterface {
   use StringTranslationTrait;
 
   /**
-   * Migration plugin manager service.
+   * Associative array of migrations ids and labels.
    *
-   * @var \Drupal\migrate\Plugin\MigrationPluginManagerInterface
+   * @var string[]
    */
-  protected $migrationManager;
-
-  /**
-   * Array of migrations objects.
-   *
-   * @var \Drupal\migrate\Plugin\MigrationInterface[]
-   */
-  protected $migrations;
+  protected $migrationIds = [];
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static($container->get('plugin.manager.migration'));
+    return new static(
+      $container->get('plugin.manager.migration'),
+      $container->get('entity_type.manager')
+    );
   }
 
   /**
@@ -45,19 +42,28 @@ class StanfordMigratePermissions implements ContainerInjectionInterface {
    *
    * @throws \Drupal\Component\Plugin\Exception\PluginException
    */
-  public function __construct(MigrationPluginManagerInterface $migrations_manager) {
-    $this->migrationManager = $migrations_manager;
-    $this->migrations = $this->migrationManager->createInstances([]);
+  public function __construct(MigrationPluginManagerInterface $migrations_manager, EntityTypeManagerInterface $entityTypeManager) {
+    $migrations = $migrations_manager->createInstances([]);
+    foreach($migrations as $id => $migration){
+      $this->migrationIds[$id] = $migration->label();
+    }
 
     // Some migrations will be run when its dependent migration is ran.
-    foreach ($this->migrations as $migration) {
+    foreach ($migrations as $migration) {
       $migration_dependencies = $migration->getMigrationDependencies();
       if (empty($migration_dependencies['required'])) {
         continue;
       }
       foreach ($migration->getMigrationDependencies()['required'] as $dependency) {
-        unset($this->migrations[$dependency]);
+        unset($this->migrationIds[$dependency]);
       }
+    }
+
+    /** @var \Drupal\migrate_plus\Entity\Migration[] $migration_entities */
+    $migration_entities = $entityTypeManager->getStorage('migration')
+      ->loadMultiple();
+    foreach($migration_entities as $id => $entity){
+      $this->migrationIds[$id] = $entity->label();
     }
   }
 
@@ -70,9 +76,9 @@ class StanfordMigratePermissions implements ContainerInjectionInterface {
   public function permissions() {
     $permissions = [];
 
-    foreach ($this->migrations as $migration_id => $migration) {
+    foreach ($this->migrationIds as $migration_id => $label) {
       $permissions["import $migration_id migration"] = [
-        'title' => $this->t('Execute Migration %label', ['%label' => $migration->label()]),
+        'title' => $this->t('Execute Migration %label', ['%label' => $label]),
         'description' => $this->t('Run importer on /import page'),
       ];
     }

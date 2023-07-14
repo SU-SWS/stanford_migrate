@@ -282,7 +282,7 @@ function stanford_migrate_ultimate_cron_task(CronJobInterface $cron_entity) {
  *
  * @deprecated in 8.2.3 and is removed in 9.0.0. Use \Drupal::service('stanford_migrate')->executeMigration() instead.
  *
- * @see \Drupal\migrate_tools\Commands\MigrateToolsCommands::executeMigration()
+ * @see \Drupal\migrate_tools\Drush\MigrateToolsCommands::executeMigration()
  */
 function stanford_migrate_execute_migration(MigrationInterface $migration, string $migration_id, array $options = [], bool $batch = FALSE): void {
   \Drupal::service('stanford_migrate')
@@ -298,7 +298,7 @@ function stanford_migrate_execute_migration(MigrationInterface $migration, strin
  *
  * @deprecated in 8.2.3 and is removed in 9.0.0. Use \Drupal::service('stanford_migrate')->getMigrationList() instead.
  *
- * @see \Drupal\migrate_tools\Commands\MigrateToolsCommands::migrationsList()
+ * @see \Drupal\migrate_tools\Drush\MigrateToolsCommands::migrationsList()
  */
 function stanford_migrate_migration_list() {
   return \Drupal::service('stanford_migrate')->getMigrationList();
