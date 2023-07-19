@@ -39,12 +39,21 @@ class StanfordMigratePermissions implements ContainerInjectionInterface {
    *
    * @param \Drupal\migrate\Plugin\MigrationPluginManagerInterface $migrations_manager
    *   Migration plugin manager service.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   Entity Type Manager Service.
    *
    * @throws \Drupal\Component\Plugin\Exception\PluginException
    */
   public function __construct(MigrationPluginManagerInterface $migrations_manager, EntityTypeManagerInterface $entityTypeManager) {
+    /** @var \Drupal\migrate_plus\Entity\Migration[] $migration_entities */
+    $migration_entities = $entityTypeManager->getStorage('migration')
+      ->loadMultiple();
+    foreach ($migration_entities as $id => $entity) {
+      $this->migrationIds[$id] = $entity->label();
+    }
+
     $migrations = $migrations_manager->createInstances([]);
-    foreach($migrations as $id => $migration){
+    foreach ($migrations as $id => $migration) {
       $this->migrationIds[$id] = $migration->label();
     }
 
@@ -57,13 +66,6 @@ class StanfordMigratePermissions implements ContainerInjectionInterface {
       foreach ($migration->getMigrationDependencies()['required'] as $dependency) {
         unset($this->migrationIds[$dependency]);
       }
-    }
-
-    /** @var \Drupal\migrate_plus\Entity\Migration[] $migration_entities */
-    $migration_entities = $entityTypeManager->getStorage('migration')
-      ->loadMultiple();
-    foreach ($migration_entities as $id => $entity) {
-      $this->migrationIds[$id] = $entity->label();
     }
   }
 
