@@ -62,7 +62,7 @@ class StanfordMigratePermissions implements ContainerInjectionInterface {
     /** @var \Drupal\migrate_plus\Entity\Migration[] $migration_entities */
     $migration_entities = $entityTypeManager->getStorage('migration')
       ->loadMultiple();
-    foreach($migration_entities as $id => $entity){
+    foreach ($migration_entities as $id => $entity) {
       $this->migrationIds[$id] = $entity->label();
     }
   }
