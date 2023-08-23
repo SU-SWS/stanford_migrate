@@ -25,7 +25,7 @@ abstract class DataParserTestBase extends UnitTestCase {
    */
   protected function setUp(): void {
     parent::setUp();
-$this->dataFetcherContent =
+
     $data_fetcher = $this->createMock(DataFetcherPluginInterface::class);
     $data_fetcher->method('getResponseContent')
       ->willReturnReference($this->dataFetcherContent);
