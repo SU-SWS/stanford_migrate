@@ -44,7 +44,6 @@ class StanfordUrl extends Url {
    * data. This can then be used by process plugins.
    */
   public function next() {
-
     $this->currentSourceIds = NULL;
     $this->currentRow = NULL;
 
@@ -53,12 +52,9 @@ class StanfordUrl extends Url {
     while (!isset($this->currentRow) && $this->getIterator()->valid()) {
 
       $row_data = $this->getIterator()->current() + $this->configuration;
-
       // Add current url to row data for use in process plugins.
       $plugin = $this->getDataParserPlugin();
-      if (method_exists($plugin, "getCurrentUrl")) {
-        $row_data['current_feed_url'] = $plugin->getCurrentUrl();
-      }
+      $row_data['current_feed_url'] = $plugin->currentUrl();
       // End new custom code.
 
       $this->fetchNextRow();
@@ -86,10 +82,10 @@ class StanfordUrl extends Url {
       // Check whether the row needs processing.
       // 1. This row has not been imported yet.
       // 2. Explicitly set to update.
-      // 3. The row is newer than the current highwater mark.
+      // 3. The row is newer than the current high-water mark.
       // 4. If no such property exists then try by checking the hash of the row.
       // 5. Flag when just needing the row's IDS.
-      if (!$row->getIdMap() || $row->needsUpdate() || $this->aboveHighwater($row) || $this->rowChanged($row) || $this->gettingIds) {
+      if (!$row->getIdMap() || $row->needsUpdate() || $this->aboveHighWater($row) || $this->rowChanged($row) || $this->gettingIds) {
         $this->currentRow = $row->freezeSource();
       }
 
