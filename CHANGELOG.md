@@ -1,5 +1,11 @@
 # Stanford Migrate
 
+8.5.0
+--------------------------------------------------------------------------------
+_Release Date: 2023-08-23_
+
+- Added new `localist_json` data source to provide paged results from the Localist API.
+
 8.4.4
 --------------------------------------------------------------------------------
 _Release Date: 2023-07-28_
