@@ -25,7 +25,13 @@ class LocalistJsonTest extends DataParserTestBase {
     $plugin = new TestLocalistJson(['urls' => []], '', []);
     $this->assertEmpty($plugin->getUrls());
 
-    $plugin = new TestLocalistJson(['urls' => ['foobar', 'barbaz', 'bazbar']], '', []);
+    $plugin = new TestLocalistJson([
+      'urls' => [
+        'foobar',
+        'barbaz',
+        'bazbar',
+      ],
+    ], '', []);
     $expected = [
       'foobar?pp=100&page=1',
       'barbaz?pp=100&page=1',
@@ -63,7 +69,11 @@ class LocalistJsonTest extends DataParserTestBase {
 class TestLocalistJson extends LocalistJson {
 
   public function getUrls() {
-    return $this->urls;
+    $urls = [];
+    foreach ($this->urls as $url) {
+      $urls = [...$urls, ...self::getPagedUrls($url)];
+    }
+    return $urls;
   }
 
 }
