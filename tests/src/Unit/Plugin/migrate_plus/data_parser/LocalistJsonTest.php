@@ -5,8 +5,10 @@ namespace Drupal\Tests\stanford_migrate\Unit\Plugin\migrate_plus\data_parser;
 use Drupal\stanford_migrate\Plugin\migrate_plus\data_parser\LocalistJson;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Psr7\Stream;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class LocalistJsonTest extends DataParserTestBase {
@@ -60,7 +62,12 @@ class LocalistJsonTest extends DataParserTestBase {
     }
 
     $guzzle_response = $this->createMock(ResponseInterface::class);
-    $guzzle_response->method('getBody')->willReturn(json_encode($data));
+    $resource = fopen('php://memory','r+');
+    fwrite($resource, json_encode($data));
+    rewind($resource);
+    $body = new Stream($resource);
+
+    $guzzle_response->method('getBody')->willReturn($body);
     return $guzzle_response;
   }
 
@@ -70,6 +77,7 @@ class TestLocalistJson extends LocalistJson {
 
   public function getUrls() {
     $urls = [];
+
     foreach ($this->urls as $url) {
       $urls = [...$urls, ...self::getPagedUrls($url)];
     }
