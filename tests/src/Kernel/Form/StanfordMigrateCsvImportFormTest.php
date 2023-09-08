@@ -38,7 +38,7 @@ class StanfordMigrateCsvImportFormTest extends StanfordMigrateKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp(): void {
+  public function setup(): void {
     parent::setUp();
     $this->installEntitySchema('file');
     $this->installSchema('file', ['file_usage']);

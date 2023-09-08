@@ -25,7 +25,7 @@ class MigrateLocalTasksTest extends UnitTestCase {
   /**
    * {@inheritDoc}
    */
-  protected function setUp(): void {
+  public function setup(): void {
     parent::setUp();
 
     $module_handler = $this->createMock(ModuleHandlerInterface::class);

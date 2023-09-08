@@ -11,7 +11,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class LocalistJsonTest extends DataParserTestBase {
 
-  protected function setUp(): void {
+  public function setup(): void {
     parent::setUp();
     $client = $this->createMock(ClientInterface::class);
     $client->method('request')

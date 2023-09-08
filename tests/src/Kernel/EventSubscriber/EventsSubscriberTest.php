@@ -11,7 +11,7 @@ class EventsSubscriberTest extends StanfordMigrateKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp(): void {
+  public function setup(): void {
     parent::setUp();
     \Drupal::configFactory()
       ->getEditable('migrate_plus.migration.stanford_migrate')

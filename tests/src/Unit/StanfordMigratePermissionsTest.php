@@ -21,7 +21,7 @@ class StanfordMigratePermissionsTest extends UnitTestCase {
   /**
    * {@inheritDoc}
    */
-  protected function setUp(): void {
+  public function setup(): void {
     parent::setUp();
 
     $migration = $this->createMock(Migration::class);
