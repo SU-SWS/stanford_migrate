@@ -53,6 +53,8 @@ class StanfordMigrateCsvImportForm extends EntityForm {
    *   Core state service.
    * @param \Drupal\file\FileUsage\FileUsageInterface $fileUsage
    *   File module usage service.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   Entity type manager service.
    */
   public function __construct(protected MigrationPluginManagerInterface $migrationManager, protected StateInterface $state, protected FileUsageInterface $fileUsage, EntityTypeManagerInterface $entityTypeManager) {
     $this->entityTypeManager = $entityTypeManager;
@@ -281,6 +283,8 @@ class StanfordMigrateCsvImportForm extends EntityForm {
    *   Complete form.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   Submitted form state.
+   *
+   * @codeCoverageIgnore Not really possible to unit test this.
    */
   public function import(array $form, FormStateInterface $form_state) {
     // Invalidate the migration cache since the file is changing.
