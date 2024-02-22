@@ -94,7 +94,12 @@ class StanfordMigrateBatchExecutable extends MigrateBatchExecutable {
     /** @var \Drupal\migrate\Plugin\MigrationInterface $migration */
     $migration = \Drupal::getContainer()
       ->get('plugin.manager.migration')
-      ->createInstance($migration_id);
+      ->createInstance($migration_id, $options);
+
+    // Make sure the migration plugin has the passed configuration settings.
+    foreach ($options['configuration'] as $key => $value) {
+      $migration->set($key, $value);
+    }
 
     $executable = new StanfordMigrateBatchExecutable($migration, $message, $options);
 

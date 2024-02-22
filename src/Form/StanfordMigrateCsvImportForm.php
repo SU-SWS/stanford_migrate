@@ -5,6 +5,7 @@ namespace Drupal\stanford_migrate\Form;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityForm;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Session\AccountInterface;
@@ -25,32 +26,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class StanfordMigrateCsvImportForm extends EntityForm {
 
   /**
-   * Migration plugin manager service.
-   *
-   * @var \Drupal\migrate\Plugin\MigrationPluginManagerInterface
-   */
-  protected $migrationManager;
-
-  /**
    * Migration plugin instance that matches the migration entity.
    *
    * @var \Drupal\migrate\Plugin\MigrationInterface
    */
   protected $migrationPlugin;
-
-  /**
-   * Core state service.
-   *
-   * @var \Drupal\Core\State\StateInterface
-   */
-  protected $state;
-
-  /**
-   * File module usage service.
-   *
-   * @var \Drupal\file\FileUsage\FileUsageInterface
-   */
-  protected $fileUsage;
 
   /**
    * {@inheritDoc}
@@ -59,24 +39,23 @@ class StanfordMigrateCsvImportForm extends EntityForm {
     return new static(
       $container->get('plugin.manager.migration'),
       $container->get('state'),
-      $container->get('file.usage')
+      $container->get('file.usage'),
+      $container->get('entity_type.manager')
     );
   }
 
   /**
    * StanfordMigrateCsvImportForm constructor.
    *
-   * @param \Drupal\migrate\Plugin\MigrationPluginManagerInterface $migration_manager
+   * @param \Drupal\migrate\Plugin\MigrationPluginManagerInterface $migrationManager
    *   Migration plugin manager service.
    * @param \Drupal\Core\State\StateInterface $state
    *   Core state service.
-   * @param \Drupal\file\FileUsage\FileUsageInterface $file_usage
+   * @param \Drupal\file\FileUsage\FileUsageInterface $fileUsage
    *   File module usage service.
    */
-  public function __construct(MigrationPluginManagerInterface $migration_manager, StateInterface $state, FileUsageInterface $file_usage) {
-    $this->migrationManager = $migration_manager;
-    $this->state = $state;
-    $this->fileUsage = $file_usage;
+  public function __construct(protected MigrationPluginManagerInterface $migrationManager, protected StateInterface $state, protected FileUsageInterface $fileUsage, EntityTypeManagerInterface $entityTypeManager) {
+    $this->entityTypeManager = $entityTypeManager;
 
     /** @var \Drupal\migrate_plus\Entity\MigrationInterface $migration */
     $migration = $this->getRequest()->attributes->get('migration');
@@ -175,6 +154,7 @@ class StanfordMigrateCsvImportForm extends EntityForm {
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
     parent::validateForm($form, $form_state);
+
     // When removing the original file, don't go through validating.
     if (
       $form_state->getTriggeringElement()['#name'] == 'csv_remove_button' ||
@@ -232,8 +212,7 @@ class StanfordMigrateCsvImportForm extends EntityForm {
     if ($form_state::hasAnyErrors()) {
       return;
     }
-    // Invalidate the migration cache since the file is changing.
-    Cache::invalidateTags(['migration_plugins']);
+
     $this->migrationPlugin->getIdMap()->prepareUpdate();
     $migration_id = $this->entity->id();
 
@@ -304,13 +283,28 @@ class StanfordMigrateCsvImportForm extends EntityForm {
    *   Submitted form state.
    */
   public function import(array $form, FormStateInterface $form_state) {
+    // Invalidate the migration cache since the file is changing.
+    $this->migrationManager->clearCachedDefinitions();
+    Cache::invalidateTags(['migration_plugins']);
+
     $migration_id = $this->entity->id();
     $state = $this->state->get("stanford_migrate.csv.$migration_id", []);
+
     if (!empty($state)) {
+
       try {
+        /** @var \Drupal\migrate\Plugin\MigrationInterface $migration */
         $migration = $this->migrationManager->createInstance($migration_id);
+        $definition = $migration->getPluginDefinition();
+
+        $fid = $form_state->getValue(['csv', 0]);
+        $file = $this->entityTypeManager->getStorage('file')->load($fid);
+        $definition['source']['path'] = $file->getFileUri();
+
+        $options = ['configuration' => $definition];
+
         $migrateMessage = new MigrateMessage();
-        $executable = new StanfordMigrateBatchExecutable($migration, $migrateMessage);
+        $executable = new StanfordMigrateBatchExecutable($migration, $migrateMessage, $options);
         $executable->batchImport();
       }
       catch (\Exception $e) {
