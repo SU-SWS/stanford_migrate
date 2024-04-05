@@ -1,5 +1,11 @@
 # Stanford Migrate
 
+8.5.9
+--------------------------------------------------------------------------------
+_Release Date: 2024-004-05_
+
+- Clear migration plugin cached data before running the importers via cron or UI
+
 8.5.8
 --------------------------------------------------------------------------------
 _Release Date: 2024-03-14_
