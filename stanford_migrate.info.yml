@@ -3,7 +3,7 @@ description: 'Adds more functionality to migrate and migrate plus modules'
 type: module
 core_version_requirement: ^9 || ^10 || ^11
 package: 'Stanford'
-version: 8.5.9
+version: 8.5.10
 dependencies:
   - drupal:migrate
   - empty_fields:empty_fields
