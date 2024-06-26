@@ -1,8 +1,14 @@
 # Stanford Migrate
 
+8.6.0
+--------------------------------------------------------------------------------
+_Release Date: 2024-06-26_
+
+- D11 upgrades, removing deprecated code.
+
 8.5.10
 --------------------------------------------------------------------------------
-_Release Date: 2024-004-05_
+_Release Date: 2024-04-05_
 
 - Fixed logging in orphan action
 

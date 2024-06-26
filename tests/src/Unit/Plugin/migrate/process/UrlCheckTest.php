@@ -3,7 +3,6 @@
 namespace Drupal\Tests\stanford_migrate\Unit\Plugin\migrate\process;
 
 use Drupal\migrate\MigrateExecutableInterface;
-use Drupal\migrate\MigrateSkipProcessException;
 use Drupal\migrate\MigrateSkipRowException;
 use Drupal\migrate\Row;
 use Drupal\stanford_migrate\Plugin\migrate\process\UrlCheck;
@@ -28,8 +27,8 @@ class UrlCheckTest extends UnitTestCase {
     $value = $plugin->transform('https://google.com', $migrate, $row, NULL);
     $this->assertEquals('https://google.com', $value);
 
-    $this->expectException(MigrateSkipProcessException::class);
     $plugin->transform('Foo Bar', $migrate, $row, NULL);
+    $this->assertTrue($plugin->isPipelineStopped());
   }
 
   /**

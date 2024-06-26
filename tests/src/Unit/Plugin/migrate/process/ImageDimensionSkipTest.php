@@ -3,7 +3,6 @@
 namespace Drupal\Tests\stanford_migrate\Unit\Plugin\migrate\process;
 
 use Drupal\migrate\MigrateExecutableInterface;
-use Drupal\migrate\MigrateSkipProcessException;
 use Drupal\migrate\MigrateSkipRowException;
 use Drupal\migrate\Row;
 use Drupal\stanford_migrate\Plugin\migrate\process\ImageDimensionSkip;
@@ -80,8 +79,8 @@ class ImageDimensionSkipTest extends UnitTestCase {
     $this->assertEquals($value, $plugin->transform($value, $migrate, $row, ''));
 
     $value = '50x50';
-    $this->expectException(MigrateSkipProcessException::class);
     $plugin->transform($value, $migrate, $row, '');
+    $this->assertTrue($plugin->isPipelineStopped());
   }
 
 }

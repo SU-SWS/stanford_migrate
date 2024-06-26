@@ -3,7 +3,6 @@
 namespace Drupal\stanford_migrate\Plugin\migrate\process;
 
 use Drupal\migrate\MigrateExecutableInterface;
-use Drupal\migrate\MigrateSkipProcessException;
 use Drupal\migrate\MigrateSkipRowException;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
@@ -80,7 +79,8 @@ class ImageDimensionSkip extends ProcessPluginBase {
    */
   public function process($value, MigrateExecutableInterface $migrate_executable, Row $row, $destination_property) {
     if (!$this->isImageBigger($value)) {
-      throw new MigrateSkipProcessException();
+      $this->stopPipeline();
+      return NULL;
     }
     return $value;
   }
