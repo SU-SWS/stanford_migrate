@@ -1,5 +1,11 @@
 # Stanford Migrate
 
+8.6.1
+--------------------------------------------------------------------------------
+_Release Date: 2024-07-17_
+
+- Bugfix: Fix readonly display settings for fields locked by migration.
+
 8.6.0
 --------------------------------------------------------------------------------
 _Release Date: 2024-06-26_
