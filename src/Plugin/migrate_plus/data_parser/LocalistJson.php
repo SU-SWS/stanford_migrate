@@ -20,7 +20,7 @@ class LocalistJson extends Json {
   protected function getSourceData(string $url, string|int $item_selector = ''): array {
     $source_data = [];
     foreach (self::getPagedUrls($url) as $page_url) {
-      $source_data = [...$source_data, ...parent::getSourceData($page_url)];
+      $source_data = [...$source_data, ...parent::getSourceData($page_url, $item_selector)];
     }
     return $source_data;
   }

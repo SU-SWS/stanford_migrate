@@ -1,5 +1,12 @@
 # Stanford Migrate
 
+8.6.4
+--------------------------------------------------------------------------------
+_Release Date: 2024-08-08_
+
+- Fixed Localist json data parser to work with the new version of migrate_plus
+
+
 8.6.3
 --------------------------------------------------------------------------------
 _Release Date: 2024-07-31_
