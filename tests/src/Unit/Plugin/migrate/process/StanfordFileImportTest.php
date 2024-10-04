@@ -55,7 +55,7 @@ class StanfordFileImportTest extends UnitTestCase {
     $migrate_executable = $this->createMock(MigrateExecutable::class);
     $row = $this->createMock(Row::class);
     $this->assertNull($plugin->transform('https://identity.stanford.edu/wp-content/uploads/sites/3/2020/07/block-s-right.png', $migrate_executable, $row, 'field_stuff'));
-    $this->assertNull($plugin->transform('https://placeimg.com/640/480/any', $migrate_executable, $row, 'field_stuff'));
+    $this->assertNull($plugin->transform('https://content.sites.stanford.edu/sites/g/files/sbiybj27591/files/media/image/placeholder.png', $migrate_executable, $row, 'field_stuff'));
 
 
     $configuration = ['max_size' => '10MB'];
