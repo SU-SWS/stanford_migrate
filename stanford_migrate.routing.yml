@@ -23,7 +23,7 @@ entity.migration.csv_upload:
     _title: 'Upload CSV'
     _migrate_group: true
   requirements:
-    _custom_access: 'Drupal\stanford_migrate\Form\StanfordMigrateCsvImportForm::access'
+    _entity_access: 'migration.csv'
     _module_dependencies: migrate_source_csv
   options:
     parameters:
@@ -38,7 +38,7 @@ entity.migration.csv_template:
     _controller: '\Drupal\stanford_migrate\Controller\MigrationCsvTemplate::getEmptyTemplate'
     _title: 'CSV Template'
   requirements:
-    _custom_access: 'Drupal\stanford_migrate\Form\StanfordMigrateCsvImportForm::access'
+    _entity_access: 'migration.csv'
     _module_dependencies: migrate_source_csv
   options:
     parameters:

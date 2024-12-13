@@ -5,17 +5,20 @@
  * Contains stanford_migrate.module.
  */
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\migrate\Plugin\MigrateSourceInterface;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\migrate\Row;
 use Drupal\migrate_plus\Entity\Migration;
 use Drupal\node\NodeInterface;
 use Drupal\ultimate_cron\CronJobInterface;
+use Drupal\migrate_plus\Entity\MigrationInterface as MigrationEntityInterface;
 
 /**
  * Implements hook_help().
@@ -59,7 +62,8 @@ function stanford_migrate_migrate_prepare_row(Row $row, MigrateSourceInterface $
  * @return array|\Drupal\migrate_plus\Entity\MigrationInterface|mixed
  *   Migration entity or null/false if none found.
  *
- * @deprecated in 8.2.3 and is removed in 9.0.0. Use \Drupal::service('stanford_migrate')->getNodesMigration() instead.
+ * @deprecated in 8.2.3 and is removed in 9.0.0. Use
+ *   \Drupal::service('stanford_migrate')->getNodesMigration() instead.
  */
 function stanford_migrate_get_migration(NodeInterface $node) {
   return \Drupal::service('stanford_migrate')->getNodesMigration($node);
@@ -150,7 +154,7 @@ function stanford_migrate_entity_form_display_alter(EntityFormDisplayInterface $
  * Implements hook_preprocess_HOOK().
  */
 function stanford_migrate_preprocess_field(&$variables) {
-  if ($variables['element']['#third_party_settings']['stanford_migrate']['readonly'] ?? false) {
+  if ($variables['element']['#third_party_settings']['stanford_migrate']['readonly'] ?? FALSE) {
     // Wrap the readonly form fields with classes so that they can be identified
     // more easily to the user.
     $variables['attributes']['class'][] = 'messages';
@@ -203,6 +207,17 @@ function stanford_migrate_entity_type_alter(array &$entity_types) {
     $entity_types['migration']->setLinkTemplate('csv-upload', '/admin/structure/migrate/manage/{migration_group}/migrations/{migration}/csv-upload');
     $entity_types['migration']->setLinkTemplate('csv-template', '/admin/structure/migrate/manage/{migration_group}/migrations/{migration}/csv-template');
   }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_access().
+ */
+function stanford_migrate_migration_access(MigrationEntityInterface $entity, $operation, AccountInterface $account) {
+  if ($operation != 'csv') {
+    return AccessResult::neutral();
+  }
+  $migration_id = $entity->id();
+  return AccessResult::allowedIfHasPermission($account, "import $migration_id migration");
 }
 
 /**
@@ -297,7 +312,8 @@ function stanford_migrate_ultimate_cron_task(CronJobInterface $cron_entity) {
  * @param bool $batch
  *   Execute the migration using a batch process.
  *
- * @deprecated in 8.2.3 and is removed in 9.0.0. Use \Drupal::service('stanford_migrate')->executeMigration() instead.
+ * @deprecated in 8.2.3 and is removed in 9.0.0. Use
+ *   \Drupal::service('stanford_migrate')->executeMigration() instead.
  *
  * @see \Drupal\migrate_tools\Drush\MigrateToolsCommands::executeMigration()
  */
@@ -313,7 +329,8 @@ function stanford_migrate_execute_migration(MigrationInterface $migration, strin
  *   An array keyed by migration group, each value containing an array of
  *   migrations or an empty array if no migrations match the input criteria.
  *
- * @deprecated in 8.2.3 and is removed in 9.0.0. Use \Drupal::service('stanford_migrate')->getMigrationList() instead.
+ * @deprecated in 8.2.3 and is removed in 9.0.0. Use
+ *   \Drupal::service('stanford_migrate')->getMigrationList() instead.
  *
  * @see \Drupal\migrate_tools\Drush\MigrateToolsCommands::migrationsList()
  */

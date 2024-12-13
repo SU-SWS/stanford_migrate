@@ -2,13 +2,11 @@
 
 namespace Drupal\stanford_migrate\Form;
 
-use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\file\FileUsage\FileUsageInterface;
 use Drupal\migrate\MigrateMessage;
@@ -58,29 +56,9 @@ class StanfordMigrateCsvImportForm extends EntityForm {
    */
   public function __construct(protected MigrationPluginManagerInterface $migrationManager, protected StateInterface $state, protected FileUsageInterface $fileUsage, EntityTypeManagerInterface $entityTypeManager) {
     $this->entityTypeManager = $entityTypeManager;
-
     /** @var \Drupal\migrate_plus\Entity\MigrationInterface $migration */
     $migration = $this->getRequest()->attributes->get('migration');
     $this->migrationPlugin = $this->migrationManager->createInstance($migration->id());
-  }
-
-  /**
-   * Check if the user should have access to the form.
-   *
-   * @param \Drupal\Core\Session\AccountInterface $account
-   *   Current user.
-   *
-   * @return \Drupal\Core\Access\AccessResult
-   *   Allowed if the migration is a csv importer.
-   */
-  public function access(AccountInterface $account): AccessResult {
-    $source_plugin = $this->migrationPlugin->getSourcePlugin();
-    // If the migration doesn't import csv, there's no reason to allow the form.
-    if ($source_plugin->getPluginId() != 'csv') {
-      return AccessResult::forbidden();
-    }
-    $migration_id = $this->migrationPlugin->id();
-    return AccessResult::allowedIfHasPermission($account, "import $migration_id migration");
   }
 
   /**
