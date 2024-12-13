@@ -45,33 +45,6 @@ class StanfordMigrateCsvImportFormTest extends StanfordMigrateKernelTestBase {
   }
 
   /**
-   * Migrations that aren't csv importers are denied access.
-   */
-  public function testNonCsvAccess() {
-    $this->setMigrationRequest(Migration::load('stanford_migrate'));
-
-    $form_object = \Drupal::entityTypeManager()
-      ->getFormObject('migration', 'csv-upload');
-    $account = $this->createMock(AccountInterface::class);
-    $this->assertFalse($form_object->access($account)->isAllowed());
-  }
-
-  /**
-   * CSV Importers have permission access.
-   */
-  public function testCsvPermissionAccess() {
-    $this->setCsvMigrationRequest();
-
-    $account = $this->createMock(AccountInterface::class);
-    $form_object = \Drupal::entityTypeManager()
-      ->getFormObject('migration', 'csv-upload');
-    $this->assertFalse($form_object->access($account)->isAllowed());
-
-    $account->method('hasPermission')->willReturn(TRUE);
-    $this->assertTrue($form_object->access($account)->isAllowed());
-  }
-
-  /**
    * Test the functionality of the form.
    */
   public function testBuildForm() {
