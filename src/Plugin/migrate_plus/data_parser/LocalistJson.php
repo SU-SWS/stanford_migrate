@@ -35,7 +35,7 @@ class LocalistJson extends Json {
    *   Paged url results.
    */
   protected static function getPagedUrls(string $url): array {
-    $query = parse_url($url, PHP_URL_QUERY);
+    $query = parse_url($url, PHP_URL_QUERY) ?: '';
     $base_url = trim(str_replace($query, '', $url), '?');
     parse_str($query, $query_parts);
 

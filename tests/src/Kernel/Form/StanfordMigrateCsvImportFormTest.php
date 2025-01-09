@@ -10,6 +10,7 @@ use Drupal\migrate_plus\Entity\MigrationGroup;
 use Drupal\migrate_plus\Entity\MigrationInterface;
 use Drupal\Tests\stanford_migrate\Kernel\StanfordMigrateKernelTestBase;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 /**
  * Class StanfordMigrateCsvImportFormTest.
@@ -130,6 +131,8 @@ class StanfordMigrateCsvImportFormTest extends StanfordMigrateKernelTestBase {
       'migration' => $migration,
     ];
     $request = new Request([], [], $attributes);
+    $session = $this->createMock(SessionInterface::class);
+    $request->setSession($session);
     \Drupal::requestStack()->push($request);
   }
 
