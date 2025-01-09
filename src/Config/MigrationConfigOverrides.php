@@ -50,7 +50,7 @@ class MigrationConfigOverrides implements ConfigFactoryOverrideInterface {
     foreach ($names as $name) {
 
       // Only override migration entities.
-      if (substr($name, 0, 23) == 'migrate_plus.migration.') {
+      if (str_starts_with($name, 'migrate_plus.migration.')) {
         $migration_id = pathinfo($name, PATHINFO_EXTENSION);
 
         // If the state value is not set, don't do any overriding.
