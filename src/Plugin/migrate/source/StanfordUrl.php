@@ -43,7 +43,7 @@ class StanfordUrl extends Url {
    * Modify the parent method by adding the current feed url into the source
    * data. This can then be used by process plugins.
    */
-  public function next() {
+  public function next(): void {
     $this->currentSourceIds = NULL;
     $this->currentRow = NULL;
 
