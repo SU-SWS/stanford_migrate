@@ -12,3 +12,7 @@ services:
     arguments: ['@entity_type.manager', '@state']
     tags:
       - {name: config.factory.override, priority: 5}
+  stanford_migrate.route_subscriber:
+    class: Drupal\stanford_migrate\EventSubscriber\RouteSubscriber
+    tags:
+      - { name: event_subscriber }
