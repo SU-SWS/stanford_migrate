@@ -91,17 +91,21 @@ class StanfordMigrateBatchExecutable extends MigrateBatchExecutable {
 
     // Prepare the migration executable.
     $message = new MigrateMessage();
+
+    $migrationPluginManager = \Drupal::service('plugin.manager.migration');
     /** @var \Drupal\migrate\Plugin\MigrationInterface $migration */
-    $migration = \Drupal::getContainer()
-      ->get('plugin.manager.migration')
-      ->createInstance($migration_id, $options);
+    $migration = $migrationPluginManager->createInstance($migration_id, $options);
 
     // Make sure the migration plugin has the passed configuration settings.
     foreach ($options['configuration'] as $key => $value) {
       $migration->set($key, $value);
     }
 
-    $executable = new StanfordMigrateBatchExecutable($migration, $message, $options);
+    $keyvalue = \Drupal::service('keyvalue');
+    $time = \Drupal::service('datetime.time');
+    $translation = \Drupal::translation();
+
+    $executable = new StanfordMigrateBatchExecutable($migration, $message, $keyvalue, $time, $translation, $migrationPluginManager, $options);
 
     if (empty($context['sandbox']['total'])) {
       $context['sandbox']['total'] = $executable->getSource()->count();
@@ -112,7 +116,7 @@ class StanfordMigrateBatchExecutable extends MigrateBatchExecutable {
       $context['sandbox']['batch_limit'] = \Drupal::config('stanford_migrate.settings')
         ->get('batch_limit') ?: 15;
       $context['results'][$migration->id()] = [
-        '@numitems' => 0,
+        '@numItems' => 0,
         '@created' => 0,
         '@updated' => 0,
         '@failures' => 0,
@@ -132,7 +136,7 @@ class StanfordMigrateBatchExecutable extends MigrateBatchExecutable {
 
     // Store the result; will need to combine the results of all our iterations.
     $context['results'][$migration->id()] = [
-      '@numitems' => $context['results'][$migration->id()]['@numitems'] + $executable->getProcessedCount(),
+      '@numItems' => $context['results'][$migration->id()]['@numItems'] + $executable->getProcessedCount(),
       '@created' => $context['results'][$migration->id()]['@created'] + $executable->getCreatedCount(),
       '@updated' => $context['results'][$migration->id()]['@updated'] + $executable->getUpdatedCount(),
       '@failures' => $context['results'][$migration->id()]['@failures'] + $executable->getFailedCount(),
@@ -145,7 +149,7 @@ class StanfordMigrateBatchExecutable extends MigrateBatchExecutable {
       $context['finished'] = 1;
     }
     else {
-      $context['sandbox']['counter'] = $context['results'][$migration->id()]['@numitems'];
+      $context['sandbox']['counter'] = $context['results'][$migration->id()]['@numItems'];
       if ($context['sandbox']['counter'] <= $context['sandbox']['total']) {
         $context['finished'] = ((float) $context['sandbox']['counter'] / (float) $context['sandbox']['total']);
         $context['message'] = t('Importing %migration (@percent%).', [
@@ -154,7 +158,6 @@ class StanfordMigrateBatchExecutable extends MigrateBatchExecutable {
         ]);
       }
     }
-
   }
 
 }

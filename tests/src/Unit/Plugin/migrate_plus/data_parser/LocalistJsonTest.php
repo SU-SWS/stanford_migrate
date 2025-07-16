@@ -2,13 +2,13 @@
 
 namespace Drupal\Tests\stanford_migrate\Unit\Plugin\migrate_plus\data_parser;
 
+use Drupal\migrate_plus\DataFetcherPluginManager;
 use Drupal\stanford_migrate\Plugin\migrate_plus\data_parser\LocalistJson;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Psr7\Stream;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\StreamInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class LocalistJsonTest extends DataParserTestBase {
@@ -24,7 +24,9 @@ class LocalistJsonTest extends DataParserTestBase {
   }
 
   public function testJsonParser() {
-    $plugin = new TestLocalistJson(['urls' => []], '', []);
+    $fetcherPluginManager = $this->createMock(DataFetcherPluginManager::class);
+
+    $plugin = new TestLocalistJson(['urls' => []], '', [], $fetcherPluginManager);
     $this->assertEmpty($plugin->getUrls());
 
     $plugin = new TestLocalistJson([
@@ -33,7 +35,7 @@ class LocalistJsonTest extends DataParserTestBase {
         'barbaz',
         'bazbar',
       ],
-    ], '', []);
+    ], '', [], $fetcherPluginManager);
     $expected = [
       'foobar?pp=100&page=1',
       'barbaz?pp=100&page=1',
@@ -58,7 +60,7 @@ class LocalistJsonTest extends DataParserTestBase {
         break;
 
       default:
-        throw new ClientException('bad data', $this->createMock(RequestInterface::class));
+        throw new ClientException('bad data', $this->createMock(RequestInterface::class), $this->createMock(ResponseInterface::class));
     }
 
     $guzzle_response = $this->createMock(ResponseInterface::class);

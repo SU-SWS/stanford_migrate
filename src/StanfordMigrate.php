@@ -2,11 +2,14 @@
 
 namespace Drupal\stanford_migrate;
 
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Installer\InstallerKernel;
+use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerTrait;
+use Drupal\Core\StringTranslation\TranslationManager;
 use Drupal\migrate\Exception\RequirementsException;
 use Drupal\migrate\MigrateMessage;
 use Drupal\migrate\Plugin\MigrateIdMapInterface;
@@ -45,13 +48,19 @@ class StanfordMigrate implements StanfordMigrateInterface {
    */
   protected $executedMigrations = [];
 
-
   /**
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    * @param \Drupal\migrate\Plugin\MigrationPluginManagerInterface $migrationPluginManager
    * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
    */
-  public function __construct(protected EntityTypeManagerInterface $entityTypeManager, protected MigrationPluginManagerInterface $migrationPluginManager, LoggerChannelFactoryInterface $logger_factory) {
+  public function __construct(
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected MigrationPluginManagerInterface $migrationPluginManager,
+    protected KeyValueFactoryInterface $keyValue,
+    protected TimeInterface $time,
+    protected TranslationManager $translation,
+    LoggerChannelFactoryInterface $logger_factory
+  ) {
     $this->logger = $logger_factory->get('stanford_migrate');
   }
 
@@ -80,7 +89,6 @@ class StanfordMigrate implements StanfordMigrateInterface {
    * {@inheritDoc}
    */
   public function executeMigration(MigrationPluginInterface $migration, string $migration_id, array $options = []): void {
-
     // Reset migration status so that it can be executed again.
     $migration->interruptMigration(MigrationPluginInterface::RESULT_STOPPED);
     $migration->setStatus(MigrationPluginInterface::STATUS_IDLE);
@@ -93,7 +101,7 @@ class StanfordMigrate implements StanfordMigrateInterface {
     $definition = $migration->getPluginDefinition();
     $required_migrations = $definition['migration_dependencies']['required'] ?? [];
 
-    $required_migrations = array_filter($required_migrations, function ($value) use ($executed_migrations) {
+    $required_migrations = array_filter($required_migrations, function($value) use ($executed_migrations) {
       return !isset($executed_migrations[$value]);
     });
 
@@ -112,11 +120,11 @@ class StanfordMigrate implements StanfordMigrateInterface {
     $log = new MigrateMessage();
 
     if ($this->batchExecuteMigrations) {
-      $executable = new StanfordMigrateBatchExecutable($migration, $log, $options);
+      $executable = new StanfordMigrateBatchExecutable($migration, $log, $this->keyValue, $this->time, $this->translation, $this->migrationPluginManager, $options);
       $executable->batchImport();
     }
     else {
-      $executable = new MigrateExecutable($migration, $log, $options);
+      $executable = new MigrateExecutable($migration, $log, $this->keyValue, $this->time, $this->translation, $options);
       $executable->import();
     }
 
@@ -161,7 +169,6 @@ class StanfordMigrate implements StanfordMigrateInterface {
     return $migrations;
   }
 
-
   /**
    * Get the migration that imported the given node.
    *
@@ -192,7 +199,6 @@ class StanfordMigrate implements StanfordMigrateInterface {
     // Loop through the migration entities, build their migration plugins so
     // that we can dig into their source mapping data.
     foreach ($migrations as $migration) {
-
       // This migration entity has methods that allow easy queries on the
       // migrate_map tables.
       /** @var \Drupal\migrate\Plugin\MigrationInterface $migrate */
@@ -207,7 +213,6 @@ class StanfordMigrate implements StanfordMigrateInterface {
 
       // Ignore any migrate plugin that doesn't map to nodes.
       if (isset($destination_ids['nid'])) {
-
         // If the migrate id map returns something, that means this node is tied
         // to this migration. Set the static variable for later references and
         // get out of here.
@@ -239,7 +244,6 @@ class StanfordMigrate implements StanfordMigrateInterface {
           str_starts_with($destination['plugin'], 'entity:') ||
           str_starts_with($destination['plugin'], 'entity_reference_revisions:')
         ) {
-
           [, $type] = explode(':', $destination['plugin']);
 
           if ($type == $entity->getEntityTypeId()) {

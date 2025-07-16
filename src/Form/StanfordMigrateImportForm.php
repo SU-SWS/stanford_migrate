@@ -2,6 +2,7 @@
 
 namespace Drupal\stanford_migrate\Form;
 
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Datetime\DateFormatterInterface;
@@ -10,6 +11,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\Core\StringTranslation\TranslationManager;
 use Drupal\stanford_migrate\StanfordMigrateBatchExecutable;
 use Drupal\migrate\Plugin\MigrationPluginManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -31,13 +33,6 @@ class StanfordMigrateImportForm extends FormBase {
   protected $migrations;
 
   /**
-   * Date formatter service.
-   *
-   * @var \Drupal\Core\Datetime\DateFormatterInterface
-   */
-  protected $dateFormatter;
-
-  /**
    * Key Value collection of last migrations.
    *
    * @var \Drupal\Core\KeyValueStore\KeyValueStoreInterface
@@ -45,39 +40,31 @@ class StanfordMigrateImportForm extends FormBase {
   protected $lastMigrations;
 
   /**
-   * Migration plugin manager service.
-   *
-   * @var \Drupal\migrate\Plugin\MigrationPluginManagerInterface
-   */
-  protected $migrationManager;
-
-  /**
-   * Current user account.
-   *
-   * @var \Drupal\Core\Session\AccountProxyInterface
-   */
-  protected $account;
-
-  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('plugin.manager.migration'),
       $container->get('date.formatter'),
+      $container->get('current_user'),
+      $container->get('plugin.manager.migration'),
       $container->get('keyvalue'),
-      $container->get('current_user')
+      $container->get('datetime.time'),
+      $container->get('string_translation')
     );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function __construct(MigrationPluginManagerInterface $migrations_manager, DateFormatterInterface $date_formatter, KeyValueFactoryInterface $key_value, AccountProxyInterface $account) {
-    $this->dateFormatter = $date_formatter;
-    $this->lastMigrations = $key_value->get('migrate_last_imported');
-    $this->migrationManager = $migrations_manager;
-    $this->account = $account;
+  public function __construct(
+    protected DateFormatterInterface $dateFormatter,
+    protected AccountProxyInterface $account,
+    protected MigrationPluginManagerInterface $migrationManager,
+    protected KeyValueFactoryInterface $keyValue,
+    protected TimeInterface $time,
+    protected TranslationManager $translation,
+  ) {
+    $this->lastMigrations = $this->keyValue->get('migrate_last_imported');
 
     $migrations = $this->migrationManager->createInstances([]);
     $this->migrations = $migrations;
@@ -188,7 +175,7 @@ class StanfordMigrateImportForm extends FormBase {
     $this->migrationManager->clearCachedDefinitions();
     Cache::invalidateTags(['migration_plugins']);
 
-    $executable = new StanfordMigrateBatchExecutable($migration, $migrateMessage, $options);
+    $executable = new StanfordMigrateBatchExecutable($migration, $migrateMessage, $this->keyValue, $this->time, $this->translation, $this->migrationManager, $options);
     $executable->batchImport();
   }
 

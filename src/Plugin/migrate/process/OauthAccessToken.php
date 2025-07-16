@@ -63,7 +63,7 @@ class OauthAccessToken extends ProcessPluginBase implements ContainerFactoryPlug
    */
   public function transform($value, MigrateExecutableInterface $migrate_executable, Row $row, $destination_property) {
     $this->configuration += $row->getSource();
-    $options = $this->getAuthenticationPlugin()->getAuthenticationOptions();
+    $options = $this->getAuthenticationPlugin()->getAuthenticationOptions('');
     preg_match('/ .*$/', $options['headers']['Authorization'], $bearer_match);
     return trim(reset($bearer_match));
   }
