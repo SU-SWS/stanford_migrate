@@ -7,6 +7,7 @@ use Drupal\stanford_migrate\Plugin\migrate_plus\data_parser\LocalistJson;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Psr7\Stream;
+use GuzzleHttp\Psr7\Utils;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -17,7 +18,7 @@ class LocalistJsonTest extends DataParserTestBase {
     parent::setUp();
     $client = $this->createMock(ClientInterface::class);
     $client->method('request')
-      ->will($this->returnCallback([$this, 'getClientResponse']));
+      ->willReturnCallback([$this, 'getClientResponse']);
     $container = new ContainerBuilder();
     $container->set('http_client', $client);
     \Drupal::setContainer($container);
@@ -64,12 +65,7 @@ class LocalistJsonTest extends DataParserTestBase {
     }
 
     $guzzle_response = $this->createMock(ResponseInterface::class);
-    $resource = fopen('php://memory','r+');
-    fwrite($resource, json_encode($data));
-    rewind($resource);
-    $body = new Stream($resource);
-
-    $guzzle_response->method('getBody')->willReturn($body);
+    $guzzle_response->method('getBody')->willReturn(Utils::streamFor(json_encode($data)));
     return $guzzle_response;
   }
 
