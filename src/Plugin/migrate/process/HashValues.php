@@ -2,6 +2,7 @@
 
 namespace Drupal\stanford_migrate\Plugin\migrate\process;
 
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
@@ -24,12 +25,8 @@ use Drupal\migrate\Row;
  *     - some_text_field
  *     - an_array_values
  * @endcode
- *
- * @MigrateProcessPlugin(
- *   id = "hash_values",
- *   handle_multiples = TRUE
- * )
  */
+#[MigrateProcess(id: 'hash_values', handle_multiples: TRUE)]
 class HashValues extends ProcessPluginBase {
 
   /**

@@ -3,15 +3,12 @@
 namespace Drupal\stanford_migrate\Plugin\migrate\process;
 
 use Drupal\Core\Entity\RevisionableInterface;
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\Row;
 
 /**
  * Similar to entity generate plugin, but returns a keyed array with revision.
- *
- * @MigrateProcessPlugin(
- *   id = "entity_revision_generate"
- * )
  *
  * @see \Drupal\stanford_migrate\Plugin\migrate\process\EntityGenerateNoLookup
  *
@@ -33,6 +30,7 @@ use Drupal\migrate\Row;
  *       field_long_description: Default long description
  * @endcode
  */
+#[MigrateProcess(id: 'entity_revision_generate')]
 class EntityRevisionGenerate extends EntityGenerateNoLookup {
 
   /**

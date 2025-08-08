@@ -3,6 +3,7 @@
 namespace Drupal\stanford_migrate\Plugin\migrate\process;
 
 use Drupal\Component\Utility\UrlHelper;
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\MigrateSkipRowException;
 use Drupal\migrate\ProcessPluginBase;
@@ -19,11 +20,8 @@ use Drupal\migrate\Row;
  *   source: some_field
  *   method: process
  * @endcode
- *
- * @MigrateProcessPlugin(
- *   id = "url_check"
- * )
  */
+#[MigrateProcess(id: 'url_check')]
 class UrlCheck extends ProcessPluginBase {
 
   /**

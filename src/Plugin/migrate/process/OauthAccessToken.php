@@ -3,6 +3,7 @@
 namespace Drupal\stanford_migrate\Plugin\migrate\process;
 
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
@@ -17,11 +18,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * are exactly the same.
  *
  * @see \Drupal\migrate_plus\Plugin\migrate_plus\authentication\OAuth2
- *
- * @MigrateProcessPlugin(
- *   id = "oauth2_access_token"
- * )
  */
+#[MigrateProcess(id: 'oauth2_access_token')]
 class OauthAccessToken extends ProcessPluginBase implements ContainerFactoryPluginInterface {
 
   /**

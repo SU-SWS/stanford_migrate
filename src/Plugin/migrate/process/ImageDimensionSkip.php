@@ -2,6 +2,7 @@
 
 namespace Drupal\stanford_migrate\Plugin\migrate\process;
 
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\MigrateSkipRowException;
 use Drupal\migrate\ProcessPluginBase;
@@ -22,11 +23,8 @@ use Drupal\migrate\Row;
  *     method: process
  *     width: 100
  * @endcode
- *
- * @MigrateProcessPlugin(
- *   id = "image_dimension_skip"
- * )
  */
+#[MigrateProcess(id: 'image_dimension_skip')]
 class ImageDimensionSkip extends ProcessPluginBase {
 
   /**
