@@ -70,13 +70,4 @@ class StanfordMigrateHooks {
     }
   }
 
-  /**
-   * Implements hook_data_parser_info_alter().
-   */
-  #[Hook('data_parser_info_alter')]
-  public function dataParserInfoAlter(array &$definitions) {
-    $definitions['json']['class'] = '\Drupal\stanford_migrate\Plugin\migrate_plus\data_parser\StanfordJson';
-    $definitions['simple_xml']['class'] = '\Drupal\stanford_migrate\Plugin\migrate_plus\data_parser\StanfordSimpleXml';
-  }
-
 }

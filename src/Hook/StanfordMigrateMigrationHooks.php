@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\stanford_migrate\Hook;
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\migrate\Plugin\MigrateSourceInterface;
