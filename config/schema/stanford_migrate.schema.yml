@@ -1,5 +1,5 @@
 stanford_migrate.settings:
-  type: mapping
+  type: config_object
   mapping:
     batch_limit:
       type: integer
