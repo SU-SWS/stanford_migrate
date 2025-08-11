@@ -20,7 +20,9 @@ class StanfordMigrateHooks {
   public function __construct(protected StanfordMigrateInterface $stanfordMigrate, protected ModuleHandlerInterface $moduleHandler) {}
 
   /**
-   * Implements hook_help().
+   * Help information.
+   *
+   * @codeCoverageIgnore
    */
   public function help($route_name, RouteMatchInterface $route_match) {
     // Main module help for the stanford_migrate module.
