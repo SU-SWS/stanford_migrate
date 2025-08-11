@@ -10,8 +10,6 @@ use Drupal\Tests\UnitTestCase;
 /**
  * Class SmartDateAllDayAdjust.
  *
- * @group stanford_migrate
- * @coversDefaultClass \Drupal\stanford_migrate\Plugin\migrate\process\SmartDateAllDayAdjust
  */
 class SmartDateAllDayAdjustTest extends UnitTestCase {
 

@@ -11,8 +11,6 @@ use Drupal\Tests\stanford_migrate\Kernel\StanfordMigrateKernelTestBase;
 /**
  * Class StanfordSqlTest.
  *
- * @group stanford_migrate
- * @coversDefaultClass \Drupal\stanford_migrate\Plugin\migrate\id_map\StanfordSql
  */
 class StanfordSqlTest extends StanfordMigrateKernelTestBase {
 
@@ -40,7 +38,10 @@ class StanfordSqlTest extends StanfordMigrateKernelTestBase {
     $this->assertNotEmpty($migration->getIdMap()
       ->getRowByDestination(['nid' => $node->id()]));
     $this->assertNotEmpty($migration->getIdMap()
-      ->getRowByDestination(['nid' => $node->id(), 'vid' => $node->getRevisionId()]));
+      ->getRowByDestination([
+        'nid' => $node->id(),
+        'vid' => $node->getRevisionId(),
+      ]));
     $this->assertEmpty($migration->getIdMap()->getRowByDestination([]));
   }
 

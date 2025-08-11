@@ -10,8 +10,6 @@ use Drupal\Tests\UnitTestCase;
 /**
  * Class HashValuesTest.
  *
- * @group stanford_migrate
- * @coversDefaultClass \Drupal\stanford_migrate\Plugin\migrate\process\HashValues
  */
 class HashValuesTest extends UnitTestCase {
 

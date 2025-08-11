@@ -10,8 +10,6 @@ use Drupal\Tests\UnitTestCase;
 /**
  * Class MigrateLocalTasksTest.
  *
- * @group stanford_migrate
- * @coversDefaultClass \Drupal\stanford_migrate\Plugin\Derivative\MigrateLocalTasks
  */
 class MigrateLocalTasksTest extends UnitTestCase {
 

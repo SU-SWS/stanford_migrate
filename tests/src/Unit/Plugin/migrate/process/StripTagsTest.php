@@ -10,8 +10,6 @@ use Drupal\Tests\UnitTestCase;
 /**
  * Class StripTagsTest
  *
- * @group stanford_migrate
- * @coversDefaultClass \Drupal\stanford_migrate\Plugin\migrate\process\StripTags
  */
 class StripTagsTest extends UnitTestCase {
 

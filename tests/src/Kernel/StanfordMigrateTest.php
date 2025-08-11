@@ -2,17 +2,11 @@
 
 namespace Drupal\Tests\stanford_migrate\Kernel;
 
-use Drupal\migrate\Exception\RequirementsException;
-use Drupal\migrate\Plugin\MigrationInterface;
-use Drupal\migrate\Plugin\MigrationPluginManagerInterface;
-use Drupal\migrate\Plugin\RequirementsInterface;
-use Drupal\migrate_plus\Entity\Migration;
-use Drupal\node\Entity\Node;
+use Drupal\user\RoleInterface;
 
 /**
  * Tests for StanfordMigrate service.
  *
- * @coversDefaultClass \Drupal\stanford_migrate\StanfordMigrate
  */
 class StanfordMigrateTest extends StanfordMigrateKernelTestBase {
 
@@ -21,22 +15,75 @@ class StanfordMigrateTest extends StanfordMigrateKernelTestBase {
    */
   public function setup(): void {
     parent::setUp();
-    \Drupal::configFactory()
-      ->getEditable('migrate_plus.migration.stanford_migrate')
+    $this->config('migrate_plus.migration.stanford_migrate')
       ->set('source.urls', [__DIR__ . '/test.xml'])
       ->save();
+    $this->config('migrate_plus.migration.stanford_migrate_2')
+      ->set('source.urls', [__DIR__ . '/test.xml'])
+      ->save();
+
+    $this->container->get('entity_type.manager')
+      ->getStorage('user_role')
+      ->create(['id' => RoleInterface::AUTHENTICATED_ID])
+      ->save();
+    user_role_grant_permissions(RoleInterface::AUTHENTICATED_ID, ['import stanford_migrate migration']);
+  }
+
+  public function testConfigReadonly() {
+    $patterns = $this->container->get('module_handler')
+      ->invoke('stanford_migrate', 'config_readonly_whitelist_patterns');
+    $this->assertEmpty($patterns);
+
+    $migration = $this->container->get('entity_type.manager')
+      ->getStorage('migration')
+      ->load('stanford_migrate');
+    $this->assertFalse($migration->access('import'));
+
+    $source_config = $migration->get('source');
+    $source_config['plugin'] = 'csv';
+    $source_config['path'] = sys_get_temp_dir() . '/foo.csv';
+    $source_config['ids'] = ['foo'];
+    $migration->set('source', $source_config)->save();
+
+    $user = $this->container->get('entity_type.manager')
+      ->getStorage('user')
+      ->create([
+        'name' => 'admin',
+        'roles' => [RoleInterface::AUTHENTICATED_ID],
+      ]);
+    $user->activate();
+    $user->save();
+    $this->container->get('current_user')->setAccount($user);
+
+    $this->assertTrue($migration->access('csv'));
+
+    $patterns = $this->container->get('module_handler')
+      ->invoke('stanford_migrate', 'config_readonly_whitelist_patterns');
+    $this->assertEquals(['migrate_plus.migration.stanford_migrate'], $patterns);
+
+    $this->container->get('state')
+      ->set('stanford_migrate.csv.stanford_migrate', ['foo']);
+    $this->assertEquals(['foo'], $this->container->get('state')
+      ->get('stanford_migrate.csv.stanford_migrate'));
+    $migration->delete();
+
+    $this->assertNull($this->container->get('state')
+      ->get('stanford_migrate.csv.stanford_migrate'));
   }
 
   /**
    * Test importer service methods and node lookup.
    */
   public function testImporter() {
-    $this->assertCount(0, Node::loadMultiple());
+    $node_storage = $this->container->get('entity_type.manager')
+      ->getStorage('node');
+
+    $this->assertCount(0, $node_storage->loadMultiple());
     /** @var \Drupal\stanford_migrate\StanfordMigrateInterface $service */
-    $service = \Drupal::service('stanford_migrate');
+    $service = $this->container->get('stanford_migrate');
     $service->executeMigrationId('stanford_migrate');
 
-    $nodes = Node::loadMultiple();
+    $nodes = $node_storage->loadMultiple();
     $this->assertCount(1, $nodes);
 
     // Run it twice to cover the static variable.
@@ -44,7 +91,10 @@ class StanfordMigrateTest extends StanfordMigrateKernelTestBase {
     $migration = $service->getNodesMigration(reset($nodes));
     $this->assertEquals('stanford_migrate', $migration->id());
 
-    $unrelated_node = Node::create(['type' => 'article', 'title' => 'Foo Bar']);
+    $unrelated_node = $node_storage->create([
+      'type' => 'article',
+      'title' => 'Foo Bar',
+    ]);
     $unrelated_node->save();
     $this->assertNull($service->getNodesMigration($unrelated_node));
     $this->assertNull($service->getNodesMigration($unrelated_node));
@@ -55,23 +105,29 @@ class StanfordMigrateTest extends StanfordMigrateKernelTestBase {
    * Test the migration list method.
    */
   public function testMigrationList() {
-    $migration = Migration::load('stanford_migrate');
+    $migration = $this->container->get('entity_type.manager')
+      ->getStorage('migration')
+      ->load('stanford_migrate');
 
     $disabled_migration = $migration->createDuplicate();
     $disabled_migration->set('id', 'disabled_migration')
       ->set('status', FALSE)
       ->save();
 
-    $this->assertCount(0, Node::loadMultiple());
+    $node_storage = $this->container->get('entity_type.manager')
+      ->getStorage('node');
+    $this->assertCount(0, $node_storage->loadMultiple());
 
-    $migration_list = \Drupal::service('stanford_migrate')->getMigrationList();
+    $migration_list = $this->container->get('stanford_migrate')
+      ->getMigrationList();
     $this->assertArrayHasKey('stanford_migrate', $migration_list['stanford_migrate']);
     $this->assertArrayNotHasKey('disabled_migration', $migration_list['stanford_migrate']);
 
     $disabled_migration->set('status', TRUE)->save();
     drupal_flush_all_caches();
 
-    $migration_list = \Drupal::service('stanford_migrate')->getMigrationList();
+    $migration_list = $this->container->get('stanford_migrate')
+      ->getMigrationList();
     $this->assertArrayHasKey('stanford_migrate', $migration_list['stanford_migrate']);
     $this->assertArrayHasKey('disabled_migration', $migration_list['stanford_migrate']);
   }
@@ -80,9 +136,9 @@ class StanfordMigrateTest extends StanfordMigrateKernelTestBase {
    * Deleting an entity will remove it from the migration map table.
    */
   public function testEntityDelete() {
-    \Drupal::service('stanford_migrate')
+    $this->container->get('stanford_migrate')
       ->executeMigrationId('stanford_migrate');
-    $map_count = \Drupal::database()
+    $map_count = $this->container->get('database')
       ->select('migrate_map_stanford_migrate', 'm')
       ->fields('m')
       ->countQuery()
@@ -90,10 +146,12 @@ class StanfordMigrateTest extends StanfordMigrateKernelTestBase {
       ->fetchField();
     $this->assertEquals(1, $map_count);
 
-    foreach (Node::loadMultiple() as $node) {
+    $node_storage = $this->container->get('entity_type.manager')
+      ->getStorage('node');
+    foreach ($node_storage->loadMultiple() as $node) {
       $node->delete();
     }
-    $map_count = \Drupal::database()
+    $map_count = $this->container->get('database')
       ->select('migrate_map_stanford_migrate', 'm')
       ->fields('m')
       ->countQuery()
@@ -106,31 +164,36 @@ class StanfordMigrateTest extends StanfordMigrateKernelTestBase {
    * Test running a dependent migration before the called migraiton.
    */
   public function testDependentMigration() {
-    $migration = Migration::load('stanford_migrate');
-
-    $dependent_migration = $migration->createDuplicate();
-    $dependent_migration->set('id', 'cloned_migration')
-      ->set('source.urls', [__DIR__ . '/test2.xml'])
+    $migration = $this->container->get('entity_type.manager')
+      ->getStorage('migration')
+      ->load('stanford_migrate');
+    $migration->set('migration_dependencies', ['required' => ['stanford_migrate_2']])
       ->save();
 
-    $migration->set('migration_dependencies', ['required' => ['cloned_migration']])
-      ->save();
-    drupal_flush_all_caches();
+    $service = $this->container->get('stanford_migrate');
+    $service->executeMigrationId('stanford_migrate');
 
-    \Drupal::service('stanford_migrate')
-      ->executeMigrationId('stanford_migrate');
-
-    $this->assertCount(2, Node::loadMultiple());
+    $node_storage = $this->container->get('entity_type.manager')
+      ->getStorage('node');
+    $this->assertCount(2, $node_storage->loadMultiple());
   }
 
   /**
    * Batch importers work similarly.
    */
   public function testBatchExecution() {
-    $this->assertCount(0, Node::loadMultiple());
+    $migration = $this->container->get('entity_type.manager')
+      ->getStorage('migration')
+      ->load('stanford_migrate');
+    $migration->set('migration_dependencies', ['required' => ['stanford_migrate_2']])
+      ->save();
+
+    $node_storage = $this->container->get('entity_type.manager')
+      ->getStorage('node');
+    $this->assertCount(0, $node_storage->loadMultiple());
 
     /** @var \Drupal\stanford_migrate\StanfordMigrateInterface $service */
-    $service = \Drupal::service('stanford_migrate');
+    $service = $this->container->get('stanford_migrate');
     $service->setBatchExecution(TRUE)
       ->executeMigrationId('stanford_migrate');
 
@@ -138,27 +201,32 @@ class StanfordMigrateTest extends StanfordMigrateKernelTestBase {
     $batch['progressive'] = FALSE;
     batch_process();
 
-    $this->assertCount(1, Node::loadMultiple());
+    $this->assertCount(2, $node_storage->loadMultiple());
   }
 
   /**
    * Test a migration plugin that fails to check for requirements.
    */
   public function testRequirementCheck() {
-    $source_plugin = $this->createMock(RequirementsInterface::class);
-    $source_plugin->method('checkRequirements')
-      ->willThrowException(new RequirementsException());
+    $migration = $this->container->get('entity_type.manager')
+      ->getStorage('migration')
+      ->load('stanford_migrate');
+    $migration->set('migration_dependencies', ['required' => ['stanford_migrate_2']])
+      ->save();
 
-    $migration = $this->createMock(MigrationInterface::class);
-    $migration->method('getSourcePlugin')->willReturn($source_plugin);
+    $source_config = $migration->get('source');
+    $source_config['plugin'] = 'table';
+    $source_config['table_name'] = 'foo';
+    $source_config['id_fields'] = $source_config['ids'];
 
-    $plugin_manager = $this->createMock(MigrationPluginManagerInterface::class);
-    $plugin_manager->method('createInstances')->willReturn([$migration]);
-    \Drupal::getContainer()->set('plugin.manager.migration', $plugin_manager);
+    $fail_migration = $this->container->get('entity_type.manager')
+      ->getStorage('migration')
+      ->load('stanford_migrate_2');
+    $fail_migration->set('source', $source_config)
+      ->save();
 
-    /** @var \Drupal\stanford_migrate\StanfordMigrateInterface $service */
-    $service = \Drupal::service('stanford_migrate');
-    $this->assertEmpty($service->getMigrationList());
+    $this->assertCount(1, $this->container->get('stanford_migrate')
+      ->getMigrationList());
   }
 
 }

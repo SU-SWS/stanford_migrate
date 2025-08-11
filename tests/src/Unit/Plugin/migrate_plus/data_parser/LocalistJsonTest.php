@@ -65,7 +65,8 @@ class LocalistJsonTest extends DataParserTestBase {
     }
 
     $guzzle_response = $this->createMock(ResponseInterface::class);
-    $guzzle_response->method('getBody')->willReturn(Utils::streamFor(json_encode($data)));
+    $guzzle_response->method('getBody')
+      ->willReturn(Utils::streamFor(json_encode($data)));
     return $guzzle_response;
   }
 

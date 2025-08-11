@@ -13,8 +13,6 @@ use Drupal\Tests\UnitTestCase;
 /**
  * Class StanfordMigratePermissionsTest.
  *
- * @group stanford_migrate
- * @coversDefaultClass \Drupal\stanford_migrate\StanfordMigratePermissions
  */
 class StanfordMigratePermissionsTest extends UnitTestCase {
 

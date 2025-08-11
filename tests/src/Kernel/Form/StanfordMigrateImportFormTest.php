@@ -11,8 +11,6 @@ use Drupal\Tests\user\Traits\UserCreationTrait;
 /**
  * Class StanfordMigrateImportFormTest
  *
- * @group stanford_migrate
- * @coversDefaultClass \Drupal\stanford_migrate\Form\StanfordMigrateImportForm
  */
 class StanfordMigrateImportFormTest extends StanfordMigrateKernelTestBase {
 

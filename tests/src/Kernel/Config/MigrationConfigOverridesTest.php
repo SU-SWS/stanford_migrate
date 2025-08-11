@@ -8,8 +8,6 @@ use Drupal\Tests\stanford_migrate\Kernel\StanfordMigrateKernelTestBase;
 /**
  * Class MigrationConfigOverridesTest.
  *
- * @group stanford_migrate
- * @coversDefaultClass \Drupal\stanford_migrate\Config\MigrationConfigOverrides
  */
 class MigrationConfigOverridesTest extends StanfordMigrateKernelTestBase {
 
@@ -25,7 +23,7 @@ class MigrationConfigOverridesTest extends StanfordMigrateKernelTestBase {
     'user',
     'system',
     'ultimate_cron',
-    'file'
+    'file',
   ];
 
   /**
@@ -45,13 +43,15 @@ class MigrationConfigOverridesTest extends StanfordMigrateKernelTestBase {
       ->get('source');
     $this->assertArrayNotHasKey('path', $source);
 
-    \Drupal::service('file_system')->copy($this->root . '/core/misc/druplicon.png', 'public://example.jpg');
+    \Drupal::service('file_system')
+      ->copy($this->root . '/core/misc/druplicon.png', 'public://example.jpg');
     $file = File::create([
       'uri' => 'public://example.jpg',
     ]);
     $file->save();
 
-    \Drupal::state()->set('stanford_migrate.csv.stanford_migrate', [$file->id()]);
+    \Drupal::state()
+      ->set('stanford_migrate.csv.stanford_migrate', [$file->id()]);
     \Drupal::configFactory()->clearStaticCache();
 
     $source = \Drupal::configFactory()

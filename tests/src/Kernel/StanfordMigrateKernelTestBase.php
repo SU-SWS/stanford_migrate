@@ -23,6 +23,7 @@ abstract class StanfordMigrateKernelTestBase extends KernelTestBase {
     'user',
     'system',
     'ultimate_cron',
+    'migrate_source_csv',
   ];
 
   /**

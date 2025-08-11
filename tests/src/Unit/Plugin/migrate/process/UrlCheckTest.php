@@ -11,8 +11,6 @@ use Drupal\Tests\UnitTestCase;
 /**
  * Class UrlCheckTest.
  *
- * @group stanford_migrate
- * @coversDefaultClass \Drupal\stanford_migrate\Plugin\migrate\process\UrlCheck
  */
 class UrlCheckTest extends UnitTestCase {
 

@@ -12,8 +12,6 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 /**
  * Class MigrationCsvTemplateTest.
  *
- * @group stanford_migrate
- * @coversDefaultClass \Drupal\stanford_migrate\Controller\MigrationCsvTemplate
  */
 class MigrationCsvTemplateTest extends StanfordMigrateKernelTestBase {
 

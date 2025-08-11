@@ -15,8 +15,6 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 /**
  * Class StanfordMigrateCsvImportFormTest.
  *
- * @group stanford_migrate
- * @coversDefaultClass \Drupal\stanford_migrate\Form\StanfordMigrateCsvImportForm
  */
 class StanfordMigrateCsvImportFormTest extends StanfordMigrateKernelTestBase {
 
@@ -79,7 +77,7 @@ class StanfordMigrateCsvImportFormTest extends StanfordMigrateKernelTestBase {
 
     $form_state->clearErrors();
     file_put_contents('public://import.csv', '');
-    $file->set('uri','public://import.csv')->save();
+    $file->set('uri', 'public://import.csv')->save();
     $form_object->validateForm($form, $form_state);
     $this->assertTrue($form_state::hasAnyErrors());
 
@@ -125,7 +123,6 @@ class StanfordMigrateCsvImportFormTest extends StanfordMigrateKernelTestBase {
    * @param \Drupal\migrate_plus\Entity\MigrationInterface $migration
    */
   protected function setMigrationRequest(MigrationInterface $migration) {
-
     $attributes = [
       'migration_group' => MigrationGroup::load('stanford_migrate'),
       'migration' => $migration,
