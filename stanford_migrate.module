@@ -29,7 +29,6 @@ function _stanford_migrate_get_time($arg = NULL) {
   return time();
 }
 
-
 /**
  * Ultimate cron callback function to execute a migration group.
  *
