@@ -2,6 +2,7 @@
 
 namespace Drupal\stanford_migrate\Plugin\migrate\process;
 
+use Drupal\migrate\Attribute\MigrateProcess;
 use FullNameParser;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\ProcessPluginBase;
@@ -17,11 +18,8 @@ use Drupal\migrate\Row;
  *   plugin: name_field
  *   source: some_text_field
  * @endcode
- *
- * @MigrateProcessPlugin(
- *   id = "name_field"
- * )
  */
+#[MigrateProcess(id: 'name_field')]
 class NameField extends ProcessPluginBase {
 
   /**

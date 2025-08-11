@@ -2,6 +2,7 @@
 
 namespace Drupal\stanford_migrate\Plugin\migrate\process;
 
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
@@ -22,11 +23,8 @@ use Drupal\migrate\Row;
  * @endcode
  *
  * This will strip all tags except p & div tags.
- *
- * @MigrateProcessPlugin(
- *   id = "strip_tags"
- * )
  */
+#[MigrateProcess(id: 'strip_tags')]
 class StripTags extends ProcessPluginBase {
 
   /**

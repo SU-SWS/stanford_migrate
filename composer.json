@@ -14,14 +14,14 @@
         }
     ],
     "require": {
-        "php": ">=8.0",
-        "drupal/core": "^10.3 || ^11",
+        "php": ">=8.3",
+        "drupal/core": "^11.1",
         "drupal/empty_fields": "^1.0@beta",
         "drupal/migrate_file": "^2.0 || ^3.0",
         "drupal/migrate_plus": "^6.0",
         "drupal/migrate_source_csv": "^3.4",
         "drupal/migrate_tools": "^6.1",
-        "drupal/readonly_field_widget": "^1.6",
+        "drupal/readonly_field_widget": "^2.1",
         "drupal/ultimate_cron": "^2.0@alpha",
         "joshfraser/php-name-parser": "dev-master"
     },

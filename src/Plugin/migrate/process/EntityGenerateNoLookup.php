@@ -2,6 +2,7 @@
 
 namespace Drupal\stanford_migrate\Plugin\migrate\process;
 
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\Row;
 use Drupal\migrate_plus\Plugin\migrate\process\EntityGenerate;
@@ -36,6 +37,7 @@ use Drupal\migrate_plus\Plugin\migrate\process\EntityGenerate;
  *       field_long_description: Default long description
  * @endcode
  */
+#[MigrateProcess(id: 'entity_generate_no_lookup')]
 class EntityGenerateNoLookup extends EntityGenerate {
 
   /**

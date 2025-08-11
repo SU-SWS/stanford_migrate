@@ -2,6 +2,7 @@
 
 namespace Drupal\stanford_migrate\Plugin\migrate\process;
 
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
@@ -16,11 +17,8 @@ use Drupal\migrate\Row;
  *     source: end_value
  *     start_time: start_value
  * @endcode
- *
- * @MigrateProcessPlugin(
- *   id = "smartdate_adjust"
- * )
  */
+#[MigrateProcess(id: 'smartdate_adjust')]
 class SmartDateAllDayAdjust extends ProcessPluginBase {
 
   /**
