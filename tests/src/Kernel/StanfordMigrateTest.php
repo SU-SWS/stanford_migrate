@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\stanford_migrate\Kernel;
 
+use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\user\RoleInterface;
 
 /**
@@ -15,6 +16,7 @@ class StanfordMigrateTest extends StanfordMigrateKernelTestBase {
    */
   public function setup(): void {
     parent::setUp();
+
     $this->config('migrate_plus.migration.stanford_migrate')
       ->set('source.urls', [__DIR__ . '/test.xml'])
       ->save();
@@ -227,6 +229,49 @@ class StanfordMigrateTest extends StanfordMigrateKernelTestBase {
 
     $this->assertCount(1, $this->container->get('stanford_migrate')
       ->getMigrationList());
+  }
+
+  public function testReadonlyFields() {
+    /** @var \Drupal\stanford_migrate\StanfordMigrateInterface $service */
+    $service = $this->container->get('stanford_migrate');
+    $service->executeMigrationId('stanford_migrate');
+
+    $user = $this->container->get('entity_type.manager')
+      ->getStorage('user')
+      ->create([
+        'name' => 'admin',
+        'roles' => [RoleInterface::AUTHENTICATED_ID],
+      ]);
+    $user->activate();
+    $user->save();
+    $this->container->get('current_user')->setAccount($user);
+
+    $entity_type_manager = $this->container->get('entity_type.manager');
+
+    $nodes = $entity_type_manager->getStorage('node')->loadMultiple();
+    $this->assertCount(1, $nodes);
+
+    /** @var \Drupal\node\NodeInterface $node */
+    $node = reset($nodes);
+    $node->setOwner($user);
+
+    $current_route_match = $this->createMock(RouteMatchInterface::class);
+    $current_route_match->method('getParameter')->willReturn($node);
+    $this->container->set('current_route_match', $current_route_match);
+
+    $view_display = $entity_type_manager->getStorage('entity_view_display')
+      ->create([
+        'targetEntityType' => 'node',
+        'bundle' => $node->bundle(),
+        'mode' => 'default',
+        'status' => TRUE,
+      ]);
+    $view_display->setComponent('title');
+    $view_display->save();
+    $form = $this->container->get('entity.form_builder')
+      ->getForm($node, 'default');
+    $this->assertArrayHasKey('readonly_field', $form['title']['widget']);
+    $this->assertArrayNotHasKey('readonly_field', $form['uid']['widget']);
   }
 
 }

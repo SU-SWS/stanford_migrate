@@ -24,6 +24,7 @@ abstract class StanfordMigrateKernelTestBase extends KernelTestBase {
     'system',
     'ultimate_cron',
     'migrate_source_csv',
+    'readonly_field_widget',
   ];
 
   /**
@@ -36,7 +37,7 @@ abstract class StanfordMigrateKernelTestBase extends KernelTestBase {
     $this->installEntitySchema('node');
     $this->installEntitySchema('migration');
     $this->installEntitySchema('ultimate_cron_job');
-    $this->installConfig('test_stanford_migrate');
+    $this->installConfig(['test_stanford_migrate', 'system']);
     $this->installSchema('node', ['node_access']);
     $this->installSchema('system', ['sequences']);
 
