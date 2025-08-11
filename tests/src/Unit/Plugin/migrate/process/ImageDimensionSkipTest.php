@@ -11,8 +11,6 @@ use Drupal\Tests\UnitTestCase;
 /**
  * Class ImageDimensionSkipTest
  *
- * @group stanford_migrate
- * @coversDefaultClass \Drupal\stanford_migrate\Plugin\migrate\process\ImageDimensionSkip
  */
 class ImageDimensionSkipTest extends UnitTestCase {
 

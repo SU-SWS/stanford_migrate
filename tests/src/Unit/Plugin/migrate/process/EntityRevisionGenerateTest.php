@@ -21,8 +21,6 @@ use Drupal\Tests\UnitTestCase;
 /**
  * Class EntityRevisionGenerateTest.
  *
- * @group stanford_migrate
- * @coversDefaultClass \Drupal\stanford_migrate\Plugin\migrate\process\EntityRevisionGenerate
  */
 class EntityRevisionGenerateTest extends UnitTestCase {
 

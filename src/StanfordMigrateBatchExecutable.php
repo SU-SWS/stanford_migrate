@@ -97,8 +97,10 @@ class StanfordMigrateBatchExecutable extends MigrateBatchExecutable {
     $migration = $migrationPluginManager->createInstance($migration_id, $options);
 
     // Make sure the migration plugin has the passed configuration settings.
-    foreach ($options['configuration'] as $key => $value) {
-      $migration->set($key, $value);
+    if (isset($options['configuration'])) {
+      foreach ($options['configuration'] as $key => $value) {
+        $migration->set($key, $value);
+      }
     }
 
     $keyvalue = \Drupal::service('keyvalue');

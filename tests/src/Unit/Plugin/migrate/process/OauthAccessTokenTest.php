@@ -13,7 +13,6 @@ use Drupal\Tests\UnitTestCase;
 /**
  * class OauthAccessTokenTest.
  *
- * @coversDefaultClass \Drupal\stanford_migrate\Plugin\migrate\process\OauthAccessToken
  */
 class OauthAccessTokenTest extends UnitTestCase {
 

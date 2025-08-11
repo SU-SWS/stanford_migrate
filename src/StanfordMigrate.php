@@ -144,9 +144,10 @@ class StanfordMigrate implements StanfordMigrateInterface {
     $matched_migrations = $this->migrationPluginManager->createInstances(array_keys($this->getMigrationEntities()));
     // Do not return any migrations which fail to meet requirements.
     foreach ($matched_migrations as $id => $migration) {
-      if ($migration->getSourcePlugin() instanceof RequirementsInterface) {
+      $source_plugin = $migration->getSourcePlugin();
+      if ($source_plugin instanceof RequirementsInterface) {
         try {
-          $migration->getSourcePlugin()->checkRequirements();
+          $source_plugin->checkRequirements();
         }
         catch (RequirementsException $e) {
           $this->logger->error('Unable to execute migration @name: @message', [

@@ -19,8 +19,6 @@ use Drupal\Tests\UnitTestCase;
 /**
  * Class StanfordFileImportTest.
  *
- * @group stanford_migrate
- * @coversDefaultClass \Drupal\stanford_migrate\Plugin\migrate\process\StanfordFileImport
  */
 class StanfordFileImportTest extends UnitTestCase {
 
@@ -36,7 +34,8 @@ class StanfordFileImportTest extends UnitTestCase {
     $process_manager = $this->createMock(MigratePluginManager::class);
     $process_manager->method('createInstance')->willReturn($process_plugin);
     $entity_storage = $this->createMock(EntityStorageInterface::class);
-    $entity_storage->method('create')->willReturn($this->createMock(ContentEntityInterface::class));
+    $entity_storage->method('create')
+      ->willReturn($this->createMock(ContentEntityInterface::class));
     $entity_type_manager = $this->createMock(EntityTypeManagerInterface::class);
     $entity_type_manager->method('getStorage')->willReturn($entity_storage);
     $entity_type_repo = $this->createMock(EntityTypeRepositoryInterface::class);
@@ -56,7 +55,6 @@ class StanfordFileImportTest extends UnitTestCase {
     $row = $this->createMock(Row::class);
     $this->assertNull($plugin->transform('https://identity.stanford.edu/wp-content/uploads/sites/3/2020/07/block-s-right.png', $migrate_executable, $row, 'field_stuff'));
     $this->assertNull($plugin->transform('https://content.sites.stanford.edu/sites/g/files/sbiybj27591/files/media/image/placeholder.png', $migrate_executable, $row, 'field_stuff'));
-
 
     $configuration = ['max_size' => '10MB'];
     $definition = [];

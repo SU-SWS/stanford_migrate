@@ -10,8 +10,6 @@ use Drupal\Tests\UnitTestCase;
 /**
  * Class NameFieldTest.
  *
- * @group stanford_migrate
- * @coversDefaultClass \Drupal\stanford_migrate\Plugin\migrate\process\NameField
  */
 class NameFieldTest extends UnitTestCase {
 

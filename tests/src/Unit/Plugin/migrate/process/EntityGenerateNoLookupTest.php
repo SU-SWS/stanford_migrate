@@ -20,8 +20,6 @@ use Drupal\Tests\UnitTestCase;
 /**
  * Class EntityGenerateNoLookupTest.
  *
- * @group stanford_migrate
- * @coversDefaultClass \Drupal\stanford_migrate\Plugin\migrate\process\EntityGenerateNoLookup
  */
 class EntityGenerateNoLookupTest extends UnitTestCase {
 

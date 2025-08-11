@@ -5,7 +5,6 @@ namespace Drupal\Tests\stanford_migrate\Unit\Plugin\migrate_plus\data_parser;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\migrate_plus\DataFetcherPluginInterface;
 use Drupal\migrate_plus\DataFetcherPluginManager;
-use Drupal\stanford_migrate\Plugin\migrate_plus\data_parser\StanfordJson;
 use Drupal\Tests\UnitTestCase;
 
 /**
