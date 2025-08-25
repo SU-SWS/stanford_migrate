@@ -7,7 +7,7 @@
 
 use Drupal\Core\Cache\Cache;
 use Drupal\ultimate_cron\CronJobInterface;
-
+use Drupal\Core\Site\Settings;
 
 /**
  * Migration callback to just get the current timestamp.
@@ -51,10 +51,16 @@ function stanford_migrate_ultimate_cron_task(CronJobInterface $cron_entity) {
   $migration_group = str_replace('stanford_migrate_', '', $cron_entity->id());
   // Execute the migration entities in the provided migration group.
   if ($migration_group && !empty($migrations[$migration_group])) {
+    // Todo: Find a way to put this on the cron entity.
+    // Options keys can be limit, feedback, sync, idlist, and/or
+    // idlist-delimiter
+    $migrate_options = Settings::get("migrate_cron_{$migration_group}_options", []);
+    $migrate_options = $migrate_options + Settings::get('migrate_cron_options', ['feedback' => TRUE]);
+
     return array_walk($migrations[$migration_group], [
       $migrate_service,
       'executeMigration',
-    ]);
+    ], $migrate_options);
   }
   \Drupal::logger('stanford_migrate')
     ->info('No migration group @group exists. No migration executed.', ['@group' => $migration_group]);
