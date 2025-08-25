@@ -1,5 +1,11 @@
 # Stanford Migrate
 
+9.0.1
+--------------------------------------------------------------------------------
+_Release Date: 2025-08-25_
+
+- Added method to pass options such as "limit" to migration cron job execution
+
 9.0.0
 --------------------------------------------------------------------------------
 _Release Date: 2025-08-11_
