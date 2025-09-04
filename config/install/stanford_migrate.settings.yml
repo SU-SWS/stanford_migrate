@@ -1,1 +1,8 @@
-batch_limit: 15
+batch_limit: 50
+cron_options:
+  default:
+    limit: 100
+    feedback: false
+    sync: false
+    idlist: null
+    idlist-delimiter: null

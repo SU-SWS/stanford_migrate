@@ -56,17 +56,6 @@ class StanfordMigratePermissions implements ContainerInjectionInterface {
     foreach ($migrations as $id => $migration) {
       $this->migrationIds[$id] = $migration->label();
     }
-
-    // Some migrations will be run when its dependent migration is ran.
-    foreach ($migrations as $migration) {
-      $migration_dependencies = $migration->getMigrationDependencies();
-      if (empty($migration_dependencies['required'])) {
-        continue;
-      }
-      foreach ($migration->getMigrationDependencies()['required'] as $dependency) {
-        unset($this->migrationIds[$dependency]);
-      }
-    }
   }
 
   /**
