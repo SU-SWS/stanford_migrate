@@ -2,12 +2,15 @@
 
 namespace Drupal\stanford_migrate\Form;
 
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\Core\Link;
 use Drupal\Core\State\StateInterface;
+use Drupal\Core\StringTranslation\TranslationManager;
 use Drupal\file\FileUsage\FileUsageInterface;
 use Drupal\migrate\MigrateMessage;
 use Drupal\migrate\Plugin\MigrationPluginManagerInterface;
@@ -35,10 +38,13 @@ class StanfordMigrateCsvImportForm extends EntityForm {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('plugin.manager.migration'),
+      $container->get('entity_type.manager'),
       $container->get('state'),
       $container->get('file.usage'),
-      $container->get('entity_type.manager')
+      $container->get('plugin.manager.migration'),
+      $container->get('keyvalue'),
+      $container->get('datetime.time'),
+      $container->get('string_translation')
     );
   }
 
@@ -54,7 +60,15 @@ class StanfordMigrateCsvImportForm extends EntityForm {
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   Entity type manager service.
    */
-  public function __construct(protected MigrationPluginManagerInterface $migrationManager, protected StateInterface $state, protected FileUsageInterface $fileUsage, EntityTypeManagerInterface $entityTypeManager) {
+  public function __construct(
+    EntityTypeManagerInterface $entityTypeManager,
+    protected StateInterface $state,
+    protected FileUsageInterface $fileUsage,
+    protected MigrationPluginManagerInterface $migrationManager,
+    protected KeyValueFactoryInterface $keyValue,
+    protected TimeInterface $time,
+    protected TranslationManager $translation,
+  ) {
     $this->entityTypeManager = $entityTypeManager;
     /** @var \Drupal\migrate_plus\Entity\MigrationInterface $migration */
     $migration = $this->getRequest()->attributes->get('migration');
@@ -80,7 +94,7 @@ class StanfordMigrateCsvImportForm extends EntityForm {
       ]),
       '#required' => TRUE,
       '#upload_location' => 'public://csv/',
-      '#upload_validators' => ['file_validate_extensions' => ['csv']],
+      '#upload_validators' => ['FileExtension' => ['extensions' => 'csv']],
     ];
     if (!empty($this->entity->get('source')['csv_help'])) {
       $help = $this->entity->get('source')['csv_help'];
@@ -286,7 +300,7 @@ class StanfordMigrateCsvImportForm extends EntityForm {
         $options = ['configuration' => $definition];
 
         $migrateMessage = new MigrateMessage();
-        $executable = new StanfordMigrateBatchExecutable($migration, $migrateMessage, $options);
+        $executable = new StanfordMigrateBatchExecutable($migration, $migrateMessage, $this->keyValue, $this->time, $this->translation, $this->migrationManager, $options);
         $executable->batchImport();
       }
       catch (\Exception $e) {

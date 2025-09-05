@@ -83,7 +83,7 @@ class StanfordMigrateMigrationHooks {
    * Implements hook_ENTITY_TYPE_delete().
    */
   #[Hook('migration_delete')]
-  public function migrateionDelete(Migration $entity) {
+  public function migrationDelete(Migration $entity) {
     // Clean up the state if the migration is deleted.
     $this->state->delete("stanford_migrate.csv.{$entity->id()}");
   }

@@ -7,6 +7,7 @@ use Drupal\node\Entity\Node;
 use Drupal\stanford_migrate\Form\StanfordMigrateImportForm;
 use Drupal\Tests\stanford_migrate\Kernel\StanfordMigrateKernelTestBase;
 use Drupal\Tests\user\Traits\UserCreationTrait;
+use PHPUnit\Framework\Attributes\TestWith;
 
 /**
  * Class StanfordMigrateImportFormTest
@@ -30,15 +31,26 @@ class StanfordMigrateImportFormTest extends StanfordMigrateKernelTestBase {
   /**
    * Users will have access to the form if they have access to any migration.
    */
-  public function testAccess() {
-    $form_object = StanfordMigrateImportForm::create(\Drupal::getContainer());
-    $account = $this->createUser();
-    $this->assertFalse($form_object->access($account)->isAllowed());
+  #[TestWith([TRUE])]
+  #[TestWith([FALSE])]
+  public function testAccess(bool $hasMigrateAccess = FALSE) {
+    $permission = $hasMigrateAccess ? ['import stanford_migrate migration'] : ['access content'];
+    $account = $this->setUpCurrentUser([], $permission);
 
-    $account = $this->createUser(['import stanford_migrate migration']);
-    \Drupal::currentUser()->setAccount($account);
     $form_object = StanfordMigrateImportForm::create(\Drupal::getContainer());
-    $this->assertTRUE($form_object->access($account)->isAllowed());
+
+    if ($hasMigrateAccess) {
+      $this->assertFalse($account->hasPermission('access content'));
+      $this->assertTrue($account->hasPermission('import stanford_migrate migration'));
+
+      $this->assertTrue($form_object->access($account)->isAllowed());
+    }
+    else {
+      $this->assertTrue($account->hasPermission('access content'));
+      $this->assertFalse($account->hasPermission('import stanford_migrate migration'));
+
+      $this->assertFalse($form_object->access($account)->isAllowed());
+    }
   }
 
   /**
