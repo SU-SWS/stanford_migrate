@@ -1,5 +1,11 @@
 # Stanford Migrate
 
+9.0.4
+--------------------------------------------------------------------------------
+_Release Date: 2025-09-05_
+
+- Fixed error if a previously uploaded CSV has been deleted from the system.
+
 9.0.3
 --------------------------------------------------------------------------------
 _Release Date: 2025-09-05_
