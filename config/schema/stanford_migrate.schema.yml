@@ -12,7 +12,7 @@ stanford_migrate.settings:
         label: "Cron Migrate Option"
         mapping:
           limit:
-            type: number
+            type: integer
             label: "Process limit"
           feedback:
             type: boolean
