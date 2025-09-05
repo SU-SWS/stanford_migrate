@@ -119,18 +119,18 @@ class StanfordMigrateCsvImportForm extends EntityForm {
       '#open' => TRUE,
     ];
 
+    $fileStorage = $this->entityTypeManager->getStorage('file');
     // Create render arrays of links to the files.
-    array_walk($previously_uploaded_files, function (&$file) {
-      $file = [
-        '#theme' => 'file_link',
-        '#file' => $this->entityTypeManager->getStorage('file')->load($file),
-      ];
-    });
+    $files = array_map(fn($fid) => $fileStorage->load($fid), $previously_uploaded_files);
+    $files = array_filter($files);
 
     $form['forget']['previous_files'] = [
       '#theme' => 'item_list',
       '#list_type' => 'ul',
-      '#items' => $previously_uploaded_files,
+      '#items' => array_map(fn($file) => [
+        '#theme' => 'file_link',
+        '#file' => $file,
+      ], $files),
     ];
     $form['forget']['previous_files_help']['#markup'] = $this->t('<p><strong>DANGER</strong>: To avoid overwriting any of the previously imported content; check the unique ID column(s) (%ids) on the previously uploaded CSV file. Each imported item (Row) should have the unique values in the columns(s).</p>', ['%ids' => implode(', ', $this->migrationPlugin->getSourceConfiguration()['ids'])]);
 
@@ -179,7 +179,7 @@ class StanfordMigrateCsvImportForm extends EntityForm {
     }
 
     $migration_fields = $this->migrationPlugin->getSourceConfiguration()['fields'];
-    array_walk($migration_fields, function (&$field) {
+    array_walk($migration_fields, function(&$field) {
       $field = $field['selector'];
     });
 
@@ -287,7 +287,6 @@ class StanfordMigrateCsvImportForm extends EntityForm {
     $state = $this->state->get("stanford_migrate.csv.$migration_id", []);
 
     if (!empty($state)) {
-
       try {
         /** @var \Drupal\migrate\Plugin\MigrationInterface $migration */
         $migration = $this->migrationManager->createInstance($migration_id);
