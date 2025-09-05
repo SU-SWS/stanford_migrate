@@ -52,7 +52,7 @@ class StanfordMigratePermissionsTest extends UnitTestCase {
   public function testPermissions() {
     $permission_service = StanfordMigratePermissions::create(\Drupal::getContainer());
     $permissions = $permission_service->permissions();
-    $this->assertCount(1, $permissions);
+    $this->assertCount(2, $permissions);
     $this->assertArrayHasKey('import bar migration', $permissions);
   }
 

@@ -68,22 +68,6 @@ class StanfordMigrateImportForm extends FormBase {
 
     $migrations = $this->migrationManager->createInstances([]);
     $this->migrations = $migrations;
-
-    // No need to show migrations that are dependencies. They will get executed
-    // when their dependent migration is executed.
-    foreach ($migrations as $migration) {
-      foreach ($migration->getMigrationDependencies()['required'] as $dependency) {
-        unset($this->migrations[$dependency]);
-      }
-    }
-
-    // Remove migrations that the user doesn't have access to.
-    foreach (array_keys($this->migrations) as $migration_id) {
-      if (!$this->account->hasPermission("import $migration_id migration")) {
-        unset($this->migrations[$migration_id]);
-      }
-    }
-
   }
 
   /**
@@ -103,7 +87,9 @@ class StanfordMigrateImportForm extends FormBase {
       '#header' => $this->buildHeader(),
       '#empty' => $this->t('No migrations found'),
     ];
-    foreach ($this->migrations as $migration_id => $migration) {
+    // Remove migrations that the user doesn't have access to.
+    $migrations = array_filter($this->migrations, fn($migration_id) => $this->account->hasPermission("import $migration_id migration"), ARRAY_FILTER_USE_KEY);
+    foreach ($migrations as $migration_id => $migration) {
       $form['table'][$migration_id] = $this->buildRow($migration);
     }
 
@@ -136,7 +122,7 @@ class StanfordMigrateImportForm extends FormBase {
    *   Form render array.
    */
   protected function buildRow(MigrationInterface $migration) {
-    $row['label']['#markup'] = $migration->label();
+    $row['label']['#markup'] = sprintf('%s (%s)', $migration->label(), $migration->id());
     $row['status']['#markup'] = $migration->getStatusLabel();
     $row['imported']['#markup'] = $migration->getIdMap()->importedCount();
 

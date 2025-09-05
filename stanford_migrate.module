@@ -39,6 +39,8 @@ function _stanford_migrate_get_time($arg = NULL) {
  *   Ultimate cron entity.
  */
 function stanford_migrate_ultimate_cron_task(CronJobInterface $cron_entity) {
+  $migrate_settings = \Drupal::config('stanford_migrate.settings');
+
   // Invalidate migration plugins to gather any changes to config entities
   // before running import. This allows for any changes to the source urls.
   \Drupal::service('plugin.manager.migration')->clearCachedDefinitions();
@@ -51,11 +53,9 @@ function stanford_migrate_ultimate_cron_task(CronJobInterface $cron_entity) {
   $migration_group = str_replace('stanford_migrate_', '', $cron_entity->id());
   // Execute the migration entities in the provided migration group.
   if ($migration_group && !empty($migrations[$migration_group])) {
-    // Todo: Find a way to put this on the cron entity.
-    // Options keys can be limit, feedback, sync, idlist, and/or
-    // idlist-delimiter
-    $migrate_options = Settings::get("migrate_cron_{$migration_group}_options", []);
-    $migrate_options = $migrate_options + Settings::get('migrate_cron_options', ['feedback' => TRUE]);
+
+    $migrate_options = $migrate_settings->get('cron_options.' . $migration_group) ?: [];
+    $migrate_options += $migrate_settings->get('cron_options.default') ?: [];
 
     return array_walk($migrations[$migration_group], [
       $migrate_service,

@@ -39,7 +39,6 @@ abstract class StanfordMigrateKernelTestBase extends KernelTestBase {
     $this->installEntitySchema('ultimate_cron_job');
     $this->installConfig(['test_stanford_migrate', 'system']);
     $this->installSchema('node', ['node_access']);
-    $this->installSchema('system', ['sequences']);
 
     NodeType::create(['type' => 'article'])->save();
   }

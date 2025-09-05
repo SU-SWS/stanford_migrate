@@ -10,7 +10,7 @@ use Drupal\migrate_tools\MigrateBatchExecutable;
  * Class StanfordMigrateBatchExecutable that changes the batch methods.
  *
  * The primary object of this class is entirely to change the batch_limit in an
- * effort to import 15 items on each batch execution.
+ * effort to import 50 items on each batch execution.
  *
  * @package Drupal\stanford_migrate
  */
@@ -19,43 +19,9 @@ class StanfordMigrateBatchExecutable extends MigrateBatchExecutable {
   /**
    * {@inheritdoc}
    */
-  public function batchImport(): void {
-    // Create the batch operations for each migration that needs to be executed.
-    // This includes the migration for this executable, but also the dependent
-    // migrations.
-    $operations = $this->batchOperations([$this->migration], 'import', [
-      'limit' => $this->itemLimit,
-      'update' => $this->updateExistingRows,
-      'force' => $this->checkDependencies,
-      'sync' => $this->syncSource,
-      'configuration' => $this->configuration,
-    ]);
-
-    if (count($operations) > 0) {
-      $batch = [
-        'operations' => $operations,
-        'title' => t('Migrating %migrate', ['%migrate' => $this->migration->label()]),
-        'init_message' => t('Start migrating %migrate', ['%migrate' => $this->migration->label()]),
-        'progress_message' => t('Migrating %migrate', ['%migrate' => $this->migration->label()]),
-        'error_message' => t('An error occurred while migrating %migrate.', ['%migrate' => $this->migration->label()]),
-        'finished' => '\Drupal\stanford_migrate\StanfordMigrateBatchExecutable::batchFinishedImport',
-      ];
-
-      batch_set($batch);
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   protected function batchOperations(array $migrations, $operation, array $options = []): array {
     array_walk($migrations, [$this, 'prepareMigrations']);
-    $operations = parent::batchOperations($migrations, $operation, $options);
-    foreach ($operations as &$operation) {
-      // Change the operation to use this class instead of the parent.
-      $operation[0] = [self::class, 'batchProcessImport'];
-    }
-    return $operations;
+    return parent::batchOperations($migrations, $operation, $options);
   }
 
   /**
@@ -86,28 +52,33 @@ class StanfordMigrateBatchExecutable extends MigrateBatchExecutable {
       $context['sandbox']['total'] = 0;
       $context['sandbox']['counter'] = 0;
       $context['sandbox']['batch_limit'] = 0;
-      $context['sandbox']['operation'] = StanfordMigrateBatchExecutable::BATCH_IMPORT;
+      $context['sandbox']['operation'] = self::BATCH_IMPORT;
     }
 
     // Prepare the migration executable.
     $message = new MigrateMessage();
-
-    $migrationPluginManager = \Drupal::service('plugin.manager.migration');
     /** @var \Drupal\migrate\Plugin\MigrationInterface $migration */
-    $migration = $migrationPluginManager->createInstance($migration_id, $options);
+    $migration = \Drupal::service('plugin.manager.migration')
+      ->createInstance($migration_id, $options['configuration'] ?? []);
+    unset($options['configuration']);
 
-    // Make sure the migration plugin has the passed configuration settings.
-    if (isset($options['configuration'])) {
-      foreach ($options['configuration'] as $key => $value) {
-        $migration->set($key, $value);
-      }
+    // Each batch run we need to reinitialize the counter for the migration.
+    if (!empty($options['limit']) && isset($context['results'][$migration->id()]['@numItems'])) {
+      $options['limit'] -= $context['results'][$migration->id()]['@numItems'];
     }
 
-    $keyvalue = \Drupal::service('keyvalue');
-    $time = \Drupal::service('datetime.time');
-    $translation = \Drupal::translation();
+    $executable = new static(
+      $migration,
+      $message,
+      \Drupal::service('keyvalue'),
+      \Drupal::time(),
+      \Drupal::service('string_translation'),
+      \Drupal::service('plugin.manager.migration'),
+      $options,
+    );
 
-    $executable = new StanfordMigrateBatchExecutable($migration, $message, $keyvalue, $time, $translation, $migrationPluginManager, $options);
+    $batch_limit = \Drupal::config('stanford_migrate.settings')
+      ->get('batch_limit') ?: 50;
 
     if (empty($context['sandbox']['total'])) {
       $context['sandbox']['total'] = $executable->getSource()->count();
@@ -115,8 +86,7 @@ class StanfordMigrateBatchExecutable extends MigrateBatchExecutable {
       // THIS is the only change from the parent class. Allow 15 items to be
       // imported on each batch execution. The parent split the total items
       // into 100 executions which doesn't really do anything helpful.
-      $context['sandbox']['batch_limit'] = \Drupal::config('stanford_migrate.settings')
-        ->get('batch_limit') ?: 15;
+      $context['sandbox']['batch_limit'] = $batch_limit;
       $context['results'][$migration->id()] = [
         '@numItems' => 0,
         '@created' => 0,
@@ -147,7 +117,7 @@ class StanfordMigrateBatchExecutable extends MigrateBatchExecutable {
     ];
 
     // Do some housekeeping.
-    if ($result != MigrationInterface::RESULT_INCOMPLETE) {
+    if ($result !== MigrationInterface::RESULT_INCOMPLETE) {
       $context['finished'] = 1;
     }
     else {

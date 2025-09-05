@@ -4,3 +4,25 @@ stanford_migrate.settings:
     batch_limit:
       type: integer
       label: "Migration batch limit"
+    cron_options:
+      type: sequence
+      label: "Cron Job Options"
+      sequence:
+        type: mapping
+        label: "Cron Migrate Option"
+        mapping:
+          limit:
+            type: number
+            label: "Process limit"
+          feedback:
+            type: boolean
+            label: 'Feedback'
+          sync:
+            type: boolean
+            label: 'Sync'
+          idlist:
+            type: string
+            label: 'Id list to update'
+          idlist-delimiter:
+            type: string
+            label: 'Id list delimiter'
