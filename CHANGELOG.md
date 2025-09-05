@@ -1,5 +1,12 @@
 # Stanford Migrate
 
+9.0.2
+--------------------------------------------------------------------------------
+_Release Date: 2025-09-04_
+
+- Allow all migrations to be executed from import page
+- Fixed CSV importer form for D11 due to removed file validation plugins.
+
 9.0.1
 --------------------------------------------------------------------------------
 _Release Date: 2025-08-25_
