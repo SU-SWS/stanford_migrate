@@ -89,8 +89,8 @@ class StanfordMigrateTest extends StanfordMigrateKernelTestBase {
     $this->assertCount(1, $nodes);
 
     // Run it twice to cover the static variable.
-    $service->getNodesMigration(reset($nodes));
-    $migration = $service->getNodesMigration(reset($nodes));
+    $service->getEntityMigration(reset($nodes));
+    $migration = $service->getEntityMigration(reset($nodes));
     $this->assertEquals('stanford_migrate', $migration->id());
 
     $unrelated_node = $node_storage->create([
@@ -98,8 +98,8 @@ class StanfordMigrateTest extends StanfordMigrateKernelTestBase {
       'title' => 'Foo Bar',
     ]);
     $unrelated_node->save();
-    $this->assertNull($service->getNodesMigration($unrelated_node));
-    $this->assertNull($service->getNodesMigration($unrelated_node));
+    $this->assertNull($service->getEntityMigration($unrelated_node));
+    $this->assertNull($service->getEntityMigration($unrelated_node));
     $unrelated_node->delete();
   }
 
