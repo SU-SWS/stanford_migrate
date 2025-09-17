@@ -61,16 +61,18 @@ class StanfordMigrateReadonlyFieldHooks {
         $processing = $processing ?: !empty($migration->getProcess()["$field_name/$column"]) || !empty($migration->getProcess()["$field_name/0/$column"]);
       }
 
+      $dest_config = $migration->getDestinationConfiguration();
+
       // If the migration destination has the `overwrite_properties` configured,
       // those fields specifically should be locked, not the other fields that
       // are not designated in the original process configuration.
-      if ($processing && !empty($migration->getDestinationConfiguration()['overwrite_properties'])) {
+      if ($processing && !empty($dest_config['overwrite_properties'])) {
         // If the current field doesn't exist in the overwrite_properties, it
         // should not be considered to be processing since it's a one time only
         // import.
         $processing = FALSE;
 
-        foreach ($migration->get('destination')['overwrite_properties'] as $overwrite_property) {
+        foreach ($dest_config['overwrite_properties'] as $overwrite_property) {
           // If any part of the field is set to overwrite, lock the whole field
           // down.
           $overwrite_property = strstr($overwrite_property, '/', TRUE) ?: $overwrite_property;
