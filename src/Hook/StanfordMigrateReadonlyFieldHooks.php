@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\stanford_migrate\Hook;
 
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Hook\Attribute\Hook;
@@ -28,7 +29,7 @@ class StanfordMigrateReadonlyFieldHooks {
     $bundle = $context['bundle'];
     $entity = $this->routeMatch->getParameter($entity_type);
 
-    if (!$entity) {
+    if (!$entity instanceof ContentEntityInterface) {
       return;
     }
 

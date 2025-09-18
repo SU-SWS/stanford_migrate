@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\stanford_migrate\Hook;
 
+use Drupal\Core\Cache\Cache;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Hook\Attribute\Hook;
@@ -41,6 +43,13 @@ class StanfordMigrateHooks {
   #[Hook('entity_delete')]
   public function entityDelete(EntityInterface $entity) {
     $this->stanfordMigrate->deleteEntityFromMigration($entity);
+  }
+
+  #[Hook('entity_update')]
+  public function entityUpdate(EntityInterface $entity) {
+    if ($entity instanceof ContentEntityInterface) {
+      $this->stanfordMigrate->clearEntityMigrationCache($entity);
+    }
   }
 
   /**

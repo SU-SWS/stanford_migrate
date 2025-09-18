@@ -3,6 +3,8 @@
 namespace Drupal\stanford_migrate;
 
 use Drupal\Component\Datetime\TimeInterface;
+use Drupal\Core\Cache\Cache;
+use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -63,6 +65,8 @@ class StanfordMigrate implements StanfordMigrateInterface {
    *   Translation provider.
    * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
    *   Logger factory.
+   * @param \Drupal\Core\Cache\CacheBackendInterface $cache
+   *   Default cache service.
    */
   public function __construct(
     protected EntityTypeManagerInterface $entityTypeManager,
@@ -70,7 +74,8 @@ class StanfordMigrate implements StanfordMigrateInterface {
     protected KeyValueFactoryInterface $keyValue,
     protected TimeInterface $time,
     protected TranslationManager $translation,
-    LoggerChannelFactoryInterface $logger_factory
+    LoggerChannelFactoryInterface $logger_factory,
+    protected CacheBackendInterface $cache,
   ) {
     $this->logger = $logger_factory->get('stanford_migrate');
   }
@@ -180,28 +185,27 @@ class StanfordMigrate implements StanfordMigrateInterface {
 
     return $migrations;
   }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function clearEntityMigrationCache(ContentEntityInterface $entity): void {
+    $cacheKey = sprintf('stanford_migrate:%s:%s', $entity->getEntityTypeId(), $entity->id());
+    $this->cache->delete($cacheKey);
+  }
+
   /**
    * {@inheritDoc}
    */
   public function getEntityMigration(ContentEntityInterface $entity): ?MigrationInterface {
-    // Use a static variable so that it doesn't look up the migrations multiple
-    // times.
-    $entity_migration = &drupal_static(__CLASS__ . __FUNCTION__ . '_' . $entity->id());
-
-    if (!is_null($entity_migration)) {
-      // If the given node was previously looked up, but it doesn't exist from a
-      // migration, it's value will be false. But we have to return NULL due to
-      // the return type declaration.
-      return $entity_migration ?: NULL;
+    $cacheKey = sprintf('stanford_migrate:%s:%s', $entity->getEntityTypeId(), $entity->id());
+    if ($cache = $this->cache->get($cacheKey)) {
+      return $cache->data;
     }
-    // Set the static to false and check for null above. If the first attempt to
-    // find a migration doesn't show anything, we don't want to continue
-    // checking.
-    $entity_migration = FALSE;
-
     $migrations = $this->migrationPluginManager->createInstances([]);
 
     $entity_id = $entity->getEntityType()->get('entity_keys')['id'];
+    $entityMigration = NULL;
 
     // Loop through the migration entities, build their migration plugins so
     // that we can dig into their source mapping data.
@@ -221,12 +225,12 @@ class StanfordMigrate implements StanfordMigrateInterface {
         $row_data = $migrate->getIdMap()
           ->getRowByDestination([$entity_id => $entity->id()]);
         if (!empty($row_data) && $row_data['source_row_status'] != MigrateIdMapInterface::STATUS_IGNORED) {
-          $entity_migration = $migrate;
-          return $migrate;
+          $entityMigration = $migrate;
         }
       }
     }
-    return NULL;
+    $this->cache->set($cacheKey, $entityMigration, Cache::PERMANENT, ['migration-source']);
+    return $entityMigration;
   }
 
   /**
@@ -235,7 +239,7 @@ class StanfordMigrate implements StanfordMigrateInterface {
    * @codeCoverageIgnore
    */
   public function getNodesMigration(NodeInterface $node): ?MigrationInterface {
-    @trigger_error('getNodesMigration is deprecated in stanford_media:9.0.5 and is removed from 10.0.0. Use getEntityMigration()', E_USER_DEPRECATED);
+    @trigger_error('getNodesMigration is deprecated in stanford_media:9.1.0 and is removed from 10.0.0. Use getEntityMigration()', E_USER_DEPRECATED);
     return $this->getEntityMigration($node);
   }
 
@@ -243,6 +247,9 @@ class StanfordMigrate implements StanfordMigrateInterface {
    * {@inheritDoc}
    */
   public function deleteEntityFromMigration(EntityInterface $entity): void {
+    if ($entity instanceof ContentEntityInterface) {
+      $this->clearEntityMigrationCache($entity);
+    }
     foreach ($this->getMigrationList() as $migrations) {
       foreach ($migrations as $migration) {
         $destination = $migration->getDestinationConfiguration();

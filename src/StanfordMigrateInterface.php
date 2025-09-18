@@ -56,7 +56,7 @@ interface StanfordMigrateInterface {
   /**
    * Get the migration that imported the given node.
    *
-   * @deprecated in stanford_media:9.0.5 and is removed from 10.0.0. Use getEntityMigration().
+   * @deprecated in stanford_media:9.1.0 and is removed from 10.0.0. Use getEntityMigration().
    *
    * @param \Drupal\node\NodeInterface $node
    *   Node entity.
@@ -76,6 +76,14 @@ interface StanfordMigrateInterface {
    *   Migration entity or null if none found.
    */
   public function getEntityMigration(ContentEntityInterface $entity): ?MigrationInterface;
+
+  /**
+   * Clear the cached migration data for the content entity.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   Entity object.
+   */
+  public function clearEntityMigrationCache(ContentEntityInterface $entity): void;
 
   /**
    * Remove the record that the given entity was imported from a migration.
