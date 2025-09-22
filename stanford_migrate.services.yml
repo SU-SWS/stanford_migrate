@@ -3,7 +3,7 @@ services:
     alias: stanford_migrate
   stanford_migrate:
     class: Drupal\stanford_migrate\StanfordMigrate
-    arguments: [ '@entity_type.manager', '@plugin.manager.migration', '@keyvalue', '@datetime.time', '@string_translation', '@logger.factory' ]
+    arguments: [ '@entity_type.manager', '@plugin.manager.migration', '@keyvalue', '@datetime.time', '@string_translation', '@logger.factory', '@cache.default' ]
   stanford_migrate.event_subscriber:
     class: Drupal\stanford_migrate\EventSubscriber\EventsSubscriber
     arguments: ['@entity_type.manager', '@logger.factory', '@cache.default']

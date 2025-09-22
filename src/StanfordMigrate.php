@@ -3,6 +3,9 @@
 namespace Drupal\stanford_migrate;
 
 use Drupal\Component\Datetime\TimeInterface;
+use Drupal\Core\Cache\Cache;
+use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Installer\InstallerKernel;
@@ -13,10 +16,9 @@ use Drupal\Core\StringTranslation\TranslationManager;
 use Drupal\migrate\Exception\RequirementsException;
 use Drupal\migrate\MigrateMessage;
 use Drupal\migrate\Plugin\MigrateIdMapInterface;
-use Drupal\migrate\Plugin\MigrationInterface as MigrationPluginInterface;
+use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\migrate\Plugin\MigrationPluginManagerInterface;
 use Drupal\migrate\Plugin\RequirementsInterface;
-use Drupal\migrate_plus\Entity\MigrationInterface as MigrationEntityInterface;
 use Drupal\migrate_tools\MigrateExecutable;
 use Drupal\node\NodeInterface;
 
@@ -49,9 +51,22 @@ class StanfordMigrate implements StanfordMigrateInterface {
   protected $executedMigrations = [];
 
   /**
+   * Stanford migrate service constructor.
+   *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   Entity type manager service.
    * @param \Drupal\migrate\Plugin\MigrationPluginManagerInterface $migrationPluginManager
+   *   Migration plugin manager service.
+   * @param \Drupal\Core\KeyValueStore\KeyValueFactoryInterface $keyValue ,
+   *   Core key value service.
+   * @param \Drupal\Component\Datetime\TimeInterface $time
+   *   Time service.
+   * @param \Drupal\Core\StringTranslation\TranslationManager $translation
+   *   Translation provider.
    * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
+   *   Logger factory.
+   * @param \Drupal\Core\Cache\CacheBackendInterface $cache
+   *   Default cache service.
    */
   public function __construct(
     protected EntityTypeManagerInterface $entityTypeManager,
@@ -59,7 +74,8 @@ class StanfordMigrate implements StanfordMigrateInterface {
     protected KeyValueFactoryInterface $keyValue,
     protected TimeInterface $time,
     protected TranslationManager $translation,
-    LoggerChannelFactoryInterface $logger_factory
+    LoggerChannelFactoryInterface $logger_factory,
+    protected CacheBackendInterface $cache,
   ) {
     $this->logger = $logger_factory->get('stanford_migrate');
   }
@@ -88,10 +104,10 @@ class StanfordMigrate implements StanfordMigrateInterface {
   /**
    * {@inheritDoc}
    */
-  public function executeMigration(MigrationPluginInterface $migration, string $migration_id, array $options = []): void {
+  public function executeMigration(MigrationInterface $migration, string $migration_id, array $options = []): void {
     // Reset migration status so that it can be executed again.
-    $migration->interruptMigration(MigrationPluginInterface::RESULT_STOPPED);
-    $migration->setStatus(MigrationPluginInterface::STATUS_IDLE);
+    $migration->interruptMigration(MigrationInterface::RESULT_STOPPED);
+    $migration->setStatus(MigrationInterface::STATUS_IDLE);
 
     // Keep track of all migrations run during this command so the same
     // migration is not run multiple times.
@@ -141,7 +157,7 @@ class StanfordMigrate implements StanfordMigrateInterface {
       return $migrations;
     }
 
-    $matched_migrations = $this->migrationPluginManager->createInstances(array_keys($this->getMigrationEntities()));
+    $matched_migrations = $this->migrationPluginManager->createInstances([]);
     // Do not return any migrations which fail to meet requirements.
     foreach ($matched_migrations as $id => $migration) {
       $source_plugin = $migration->getSourcePlugin();
@@ -171,40 +187,29 @@ class StanfordMigrate implements StanfordMigrateInterface {
   }
 
   /**
-   * Get the migration that imported the given node.
-   *
-   * @param \Drupal\node\NodeInterface $node
-   *   Node entity.
-   *
-   * @return \Drupal\migrate_plus\Entity\MigrationInterface|null
-   *   Migration entity or null if none found.
+   * {@inheritDoc}
    */
-  public function getNodesMigration(NodeInterface $node): ?MigrationEntityInterface {
-    // Use a static variable so that it doesn't look up the migrations multiple
-    // times.
-    $node_migration = &drupal_static(__CLASS__ . __FUNCTION__ . '_' . $node->id());
+  public function clearEntityMigrationCache(ContentEntityInterface $entity): void {
+    $cacheKey = sprintf('stanford_migrate:%s:%s', $entity->getEntityTypeId(), $entity->id());
+    $this->cache->delete($cacheKey);
+  }
 
-    if (!is_null($node_migration)) {
-      // If the given node was previously looked up, but it doesn't exist from a
-      // migration, it's value will be false. But we have to return NULL due to
-      // the return type declaration.
-      return $node_migration ?: NULL;
+  /**
+   * {@inheritDoc}
+   */
+  public function getEntityMigration(ContentEntityInterface $entity): ?MigrationInterface {
+    $cacheKey = sprintf('stanford_migrate:%s:%s', $entity->getEntityTypeId(), $entity->id());
+    if ($cache = $this->cache->get($cacheKey)) {
+      return $cache->data;
     }
-    // Set the static to false and check for null above. If the first attempt to
-    // find a migration doesn't show anything, we don't want to continue
-    // checking.
-    $node_migration = FALSE;
+    $migrations = $this->migrationPluginManager->createInstances([]);
 
-    $migrations = $this->getMigrationEntities();
+    $entity_id = $entity->getEntityType()->get('entity_keys')['id'];
+    $entityMigration = NULL;
 
     // Loop through the migration entities, build their migration plugins so
     // that we can dig into their source mapping data.
-    foreach ($migrations as $migration) {
-      // This migration entity has methods that allow easy queries on the
-      // migrate_map tables.
-      /** @var \Drupal\migrate\Plugin\MigrationInterface $migrate */
-      $migrate = $this->migrationPluginManager->createInstance($migration->id());
-
+    foreach ($migrations as $migrate) {
       // CSV Imported content can be ignored since it's normally a one time thing.
       if (!$migrate || $migrate->getSourcePlugin()->getPluginId() == 'csv') {
         continue;
@@ -213,25 +218,38 @@ class StanfordMigrate implements StanfordMigrateInterface {
       $destination_ids = $migrate->getDestinationPlugin()->getIds();
 
       // Ignore any migrate plugin that doesn't map to nodes.
-      if (isset($destination_ids['nid'])) {
+      if (isset($destination_ids[$entity_id])) {
         // If the migrate id map returns something, that means this node is tied
         // to this migration. Set the static variable for later references and
         // get out of here.
         $row_data = $migrate->getIdMap()
-          ->getRowByDestination(['nid' => $node->id()]);
+          ->getRowByDestination([$entity_id => $entity->id()]);
         if (!empty($row_data) && $row_data['source_row_status'] != MigrateIdMapInterface::STATUS_IGNORED) {
-          $node_migration = $migration;
-          return $migration;
+          $entityMigration = $migrate;
         }
       }
     }
-    return NULL;
+    $this->cache->set($cacheKey, $entityMigration, Cache::PERMANENT, ['migration-source']);
+    return $entityMigration;
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @codeCoverageIgnore
+   */
+  public function getNodesMigration(NodeInterface $node): ?MigrationInterface {
+    @trigger_error('getNodesMigration is deprecated in stanford_media:9.1.0 and is removed from 10.0.0. Use getEntityMigration()', E_USER_DEPRECATED);
+    return $this->getEntityMigration($node);
   }
 
   /**
    * {@inheritDoc}
    */
   public function deleteEntityFromMigration(EntityInterface $entity): void {
+    if ($entity instanceof ContentEntityInterface) {
+      $this->clearEntityMigrationCache($entity);
+    }
     foreach ($this->getMigrationList() as $migrations) {
       foreach ($migrations as $migration) {
         $destination = $migration->getDestinationConfiguration();
@@ -260,19 +278,6 @@ class StanfordMigrate implements StanfordMigrateInterface {
         }
       }
     }
-  }
-
-  /**
-   * Get the migration entities.
-   *
-   * @return \Drupal\migrate_plus\Entity\MigrationInterface[]
-   *   Keyed array of entities.
-   */
-  protected function getMigrationEntities(): array {
-    // Load only migrations that are enabled because when getting the migration
-    // plugins, it will only create instances from active entities.
-    $storage = $this->entityTypeManager->getStorage('migration');
-    return $storage->loadByProperties(['status' => 1]);
   }
 
 }

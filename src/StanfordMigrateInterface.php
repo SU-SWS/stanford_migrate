@@ -2,9 +2,9 @@
 
 namespace Drupal\stanford_migrate;
 
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\migrate\Plugin\MigrationInterface as MigrationPluginInterface;
-use Drupal\migrate_plus\Entity\MigrationInterface as MigrationEntityInterface;
+use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\node\NodeInterface;
 
 interface StanfordMigrateInterface {
@@ -38,9 +38,9 @@ interface StanfordMigrateInterface {
    * @param array $options
    *   Array of options to pass into the migration import.
    *
-   * @see \Drupal\migrate_tools\Commands\MigrateToolsCommands::executeMigration()
+   * @see \Drupal\migrate_tools\Drush\Commands\MigrateToolsCommands::executeMigration()
    */
-  public function executeMigration(MigrationPluginInterface $migration, string $migration_id, array $options = []): void;
+  public function executeMigration(MigrationInterface $migration, string $migration_id, array $options = []): void;
 
   /**
    * Retrieve a list of active migrations, partially taken from migrate_tools.
@@ -49,20 +49,41 @@ interface StanfordMigrateInterface {
    *   An array keyed by migration group, each value containing an array of
    *   migrations or an empty array if no migrations match the input criteria.
    *
-   * @see \Drupal\migrate_tools\Commands\MigrateToolsCommands::migrationsList()
+   * @see \Drupal\migrate_tools\Drush\Commands\MigrateToolsCommands::migrationsList()
    */
   public function getMigrationList(): array;
 
   /**
    * Get the migration that imported the given node.
    *
+   * @deprecated in stanford_media:9.1.0 and is removed from 10.0.0. Use getEntityMigration().
+   *
    * @param \Drupal\node\NodeInterface $node
    *   Node entity.
    *
-   * @return \Drupal\migrate_plus\Entity\MigrationInterface|null
+   * @return \Drupal\migrate\Plugin\MigrationInterface|null
    *   Migration entity or null if none found.
    */
-  public function getNodesMigration(NodeInterface $node): ?MigrationEntityInterface;
+  public function getNodesMigration(NodeInterface $node): ?MigrationInterface;
+
+  /**
+   * Get the migration that imported the given entity.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   Content entity.
+   *
+   * @return \Drupal\migrate\Plugin\MigrationInterface|null
+   *   Migration entity or null if none found.
+   */
+  public function getEntityMigration(ContentEntityInterface $entity): ?MigrationInterface;
+
+  /**
+   * Clear the cached migration data for the content entity.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   Entity object.
+   */
+  public function clearEntityMigrationCache(ContentEntityInterface $entity): void;
 
   /**
    * Remove the record that the given entity was imported from a migration.
