@@ -1,5 +1,12 @@
 # Stanford Migrate
 
+9.1.0
+--------------------------------------------------------------------------------
+_Release Date: 2025-10-02_
+
+- URL Check migrate process should check for absolute urls.
+- Expand readonly behavior to all entity types that were migrated.
+
 9.0.4
 --------------------------------------------------------------------------------
 _Release Date: 2025-09-05_
