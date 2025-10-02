@@ -42,7 +42,7 @@ class UrlCheck extends ProcessPluginBase {
    * @throws \Drupal\migrate\MigrateSkipProcessException
    */
   public function process($value, MigrateExecutableInterface $migrate_executable, Row $row, $destination_property) {
-    if (is_array($value) || !UrlHelper::isValid($value)) {
+    if (is_array($value) || !UrlHelper::isValid($value, TRUE)) {
       $this->stopPipeline();
       return NULL;
     }
@@ -67,7 +67,7 @@ class UrlCheck extends ProcessPluginBase {
    * @throws \Drupal\migrate\MigrateSkipRowException
    */
   public function row($value, MigrateExecutableInterface $migrate_executable, Row $row, $destination_property) {
-    if (is_array($value) || !UrlHelper::isValid($value)) {
+    if (is_array($value) || !UrlHelper::isValid($value, TRUE)) {
       throw new MigrateSkipRowException();
     }
     return $value;
