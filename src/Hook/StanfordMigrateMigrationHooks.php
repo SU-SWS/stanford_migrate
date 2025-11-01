@@ -30,6 +30,10 @@ class StanfordMigrateMigrationHooks {
   public function migrateProcessInfoAlter(array &$definitions) {
     if (!empty($definitions['file_import'])) {
       $definitions['file_import']['class'] = '\Drupal\stanford_migrate\Plugin\migrate\process\StanfordFileImport';
+
+    }
+    if (!empty($definitions['download'])) {
+      $definitions['download']['class'] = '\Drupal\stanford_migrate\Plugin\migrate\process\StanfordDownload';
     }
   }
 
