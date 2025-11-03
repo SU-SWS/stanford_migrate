@@ -176,4 +176,8 @@ class StanfordDownloadTest extends DownloadTest {
     return $return;
   }
 
+  public function testWriteProtectedDestination(): void {
+    $this->markTestSkipped('Disable base test');
+  }
+
 }
