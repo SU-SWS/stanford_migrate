@@ -1,5 +1,12 @@
 # Stanford Migrate
 
+9.2.0
+--------------------------------------------------------------------------------
+_Release Date: 2025-11-03_
+
+- New image resize migrate process plugin.
+- Transliterate files when downloading during migration.
+
 9.1.0
 --------------------------------------------------------------------------------
 _Release Date: 2025-10-02_
