@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\stanford_migrate\Kernel\Plugin\migrate\process;
 
-use Drupal\Core\StreamWrapper\StreamWrapperInterface;
-use Drupal\KernelTests\Core\File\FileTestBase;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\Row;
 use Drupal\stanford_migrate\Plugin\migrate\process\StanfordDownload;
+use Drupal\Tests\migrate\Kernel\process\DownloadTest;
 use GuzzleHttp\Client;
 use PHPUnit\Framework\Attributes\Group;
 
@@ -16,20 +15,26 @@ use PHPUnit\Framework\Attributes\Group;
  * Tests the StanfordDownload process plugin.
  */
 #[Group('stanford_migrate')]
-class StanfordDownloadTest extends FileTestBase {
+class StanfordDownloadTest extends DownloadTest {
 
   /**
    * {@inheritdoc}
    */
   protected static $modules = ['system', 'file'];
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
-    $this->container->get('stream_wrapper_manager')
-      ->registerWrapper('temporary', 'Drupal\Core\StreamWrapper\TemporaryStream', StreamWrapperInterface::LOCAL_NORMAL);
+    $this->installConfig('file');
+    $this->config('file.settings')
+      ->set('filename_sanitization', [
+        'transliterate' => TRUE,
+        'replace_whitespace' => TRUE,
+        'replace_non_alphanumeric' => TRUE,
+        'deduplicate_separators' => TRUE,
+        'lowercase' => TRUE,
+        'replacement_character' => '-',
+      ])
+      ->save();
   }
 
   /**
@@ -38,13 +43,13 @@ class StanfordDownloadTest extends FileTestBase {
   public function testFilenameSanitization(): void {
     // Test with a filename that contains special characters that should be
     // transliterated.
-    $destination_uri = 'public://test_file.txt';
+    $destination_uri = 'public://Test   File & Special-Characters.txt';
     $actual_destination = $this->doTransform($destination_uri);
 
     // The plugin should process the filename through the FileUploadSanitizeNameEvent.
     // Verify that the file was created at a valid location.
     $this->assertFileExists($actual_destination);
-    $this->assertStringStartsWith('public://', $actual_destination);
+    $this->assertEquals('public://test-file-special-characters.txt', $actual_destination);
   }
 
   /**
@@ -79,7 +84,7 @@ class StanfordDownloadTest extends FileTestBase {
 
     // The file should be downloaded and the filename sanitized.
     $this->assertFileExists($actual_destination);
-    $this->assertStringStartsWith('public://', $actual_destination);
+    $this->assertEquals('public://my-file-1.txt', $actual_destination);
   }
 
   /**
@@ -118,7 +123,7 @@ class StanfordDownloadTest extends FileTestBase {
 
     // The filename should be sanitized.
     $this->assertFileExists($actual_destination);
-    $this->assertStringStartsWith('public://', $actual_destination);
+    $this->assertEquals('public://wenjianming.txt', $actual_destination);
   }
 
   /**
@@ -145,7 +150,7 @@ class StanfordDownloadTest extends FileTestBase {
    * @return string
    *   The local URI of the downloaded file.
    */
-  protected function doTransform(string $destination_uri, array $configuration = []): string {
+  protected function doTransform($destination_uri, $configuration = []) {
     // Prepare a mock HTTP client.
     $this->container->set('http_client', $this->createMock(Client::class));
 
@@ -169,6 +174,10 @@ class StanfordDownloadTest extends FileTestBase {
     $return = $plugin->transform($value, $executable, $row, 'foo');
     $this->assertCount($initial_count, get_resources('stream'));
     return $return;
+  }
+
+  public function testWriteProtectedDestination(): void {
+    $this->markTestSkipped('Disable base test');
   }
 
 }
