@@ -67,7 +67,7 @@ class StanfordMigrateCsvImportFormTest extends StanfordMigrateKernelTestBase {
     $form_object->validateForm($form, $form_state);
     $this->assertFalse($form_state::hasAnyErrors());
 
-    $file = File::create(['uri' => 'public://foo.csv', 'changed' => \Drupal::time()->getRequestTime()]);
+    $file = File::create(['uri' => 'public://foo.csv']);
     $file->save();
 
     $form['csv']['#parents'] = [];
