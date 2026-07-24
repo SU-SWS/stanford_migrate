@@ -24,6 +24,17 @@ Configuration
 
 Nothing special needed.
 
+Debug Mode
+---
+
+This module has a `debug_mode` setting for more verbose logging, disabled by default and only togglable via drush (not exposed on any config form):
+
+```
+drush cset stanford_migrate.settings debug_mode 1
+```
+
+Developers adding new logging to this module should consider gating it behind debug mode if it isn't actionable by default.
+
 
 Troubleshooting
 ---

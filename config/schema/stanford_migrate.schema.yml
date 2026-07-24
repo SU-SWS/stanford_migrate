@@ -4,6 +4,9 @@ stanford_migrate.settings:
     batch_limit:
       type: integer
       label: "Migration batch limit"
+    debug_mode:
+      type: boolean
+      label: "Debug mode"
     cron_options:
       type: sequence
       label: "Cron Job Options"

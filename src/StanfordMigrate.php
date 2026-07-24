@@ -5,6 +5,7 @@ namespace Drupal\stanford_migrate;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -67,6 +68,8 @@ class StanfordMigrate implements StanfordMigrateInterface {
    *   Logger factory.
    * @param \Drupal\Core\Cache\CacheBackendInterface $cache
    *   Default cache service.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   Config factory service.
    */
   public function __construct(
     protected EntityTypeManagerInterface $entityTypeManager,
@@ -76,6 +79,7 @@ class StanfordMigrate implements StanfordMigrateInterface {
     protected TranslationManager $translation,
     LoggerChannelFactoryInterface $logger_factory,
     protected CacheBackendInterface $cache,
+    protected ConfigFactoryInterface $configFactory,
   ) {
     $this->logger = $logger_factory->get('stanford_migrate');
   }
@@ -157,8 +161,11 @@ class StanfordMigrate implements StanfordMigrateInterface {
       return $migrations;
     }
 
-    $matched_migrations = $this->migrationPluginManager->createInstances(array_keys($this->getMigrationEntities()));
-    // Do not return any migrations which fail to meet requirements.
+    $matched_migrations = $this->migrationPluginManager->createInstances([]);
+    // Do not return any migrations which fail to meet requirements. A failed
+    // requirements check here is routine, not exceptional. Only log when
+    // debug mode is explicitly enabled.
+    $debug_mode = (bool) $this->configFactory->get('stanford_migrate.settings')->get('debug_mode');
     foreach ($matched_migrations as $id => $migration) {
       $source_plugin = $migration->getSourcePlugin();
       if ($source_plugin instanceof RequirementsInterface) {
@@ -166,10 +173,12 @@ class StanfordMigrate implements StanfordMigrateInterface {
           $source_plugin->checkRequirements();
         }
         catch (RequirementsException $e) {
-          $this->logger->error('Unable to execute migration @name: @message', [
-            '@name' => $migration->label(),
-            '@message' => $e->getMessage(),
-          ]);
+          if ($debug_mode) {
+            $this->logger->error('Unable to execute migration @name: @message', [
+              '@name' => $migration->label(),
+              '@message' => $e->getMessage(),
+            ]);
+          }
           unset($matched_migrations[$id]);
         }
       }
@@ -202,7 +211,7 @@ class StanfordMigrate implements StanfordMigrateInterface {
     if ($cache = $this->cache->get($cacheKey)) {
       return $cache->data;
     }
-    $migrations = $this->migrationPluginManager->createInstances(array_keys($this->getMigrationEntities()));
+    $migrations = $this->migrationPluginManager->createInstances([]);
 
     $entity_id = $entity->getEntityType()->get('entity_keys')['id'];
     $entityMigration = NULL;
@@ -278,24 +287,6 @@ class StanfordMigrate implements StanfordMigrateInterface {
         }
       }
     }
-  }
-
-  /**
-   * Get the enabled migration config entities.
-   *
-   * Migration plugins are discovered from every module's migrations/
-   * directory regardless of whether this site has ever configured or
-   * enabled them, so limiting to config entities avoids checking
-   * requirements on, and logging errors about, dormant plugins (e.g.
-   * contrib-bundled D6/D7 upgrade-path migrations) that this site never
-   * opted into.
-   *
-   * @return \Drupal\migrate_plus\Entity\MigrationInterface[]
-   *   Keyed array of enabled migration entities.
-   */
-  protected function getMigrationEntities(): array {
-    $storage = $this->entityTypeManager->getStorage('migration');
-    return $storage->loadByProperties(['status' => 1]);
   }
 
 }

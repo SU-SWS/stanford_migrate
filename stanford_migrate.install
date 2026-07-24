@@ -18,3 +18,13 @@ function stanford_migrate_update_8001() {
 function stanford_migrate_update_8002() {
   \Drupal::service('module_installer')->install(['empty_fields']);
 }
+
+/**
+ * Set the default debug_mode setting explicitly.
+ */
+function stanford_migrate_update_8003() {
+  \Drupal::configFactory()
+    ->getEditable('stanford_migrate.settings')
+    ->set('debug_mode', FALSE)
+    ->save();
+}
