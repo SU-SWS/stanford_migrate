@@ -5,6 +5,7 @@ namespace Drupal\stanford_migrate;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -67,6 +68,8 @@ class StanfordMigrate implements StanfordMigrateInterface {
    *   Logger factory.
    * @param \Drupal\Core\Cache\CacheBackendInterface $cache
    *   Default cache service.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   Config factory service.
    */
   public function __construct(
     protected EntityTypeManagerInterface $entityTypeManager,
@@ -76,6 +79,7 @@ class StanfordMigrate implements StanfordMigrateInterface {
     protected TranslationManager $translation,
     LoggerChannelFactoryInterface $logger_factory,
     protected CacheBackendInterface $cache,
+    protected ConfigFactoryInterface $configFactory,
   ) {
     $this->logger = $logger_factory->get('stanford_migrate');
   }
@@ -158,7 +162,10 @@ class StanfordMigrate implements StanfordMigrateInterface {
     }
 
     $matched_migrations = $this->migrationPluginManager->createInstances([]);
-    // Do not return any migrations which fail to meet requirements.
+    // Do not return any migrations which fail to meet requirements. A failed
+    // requirements check here is routine, not exceptional. Only log when
+    // debug mode is explicitly enabled.
+    $debug_mode = (bool) $this->configFactory->get('stanford_migrate.settings')->get('debug_mode');
     foreach ($matched_migrations as $id => $migration) {
       $source_plugin = $migration->getSourcePlugin();
       if ($source_plugin instanceof RequirementsInterface) {
@@ -166,10 +173,12 @@ class StanfordMigrate implements StanfordMigrateInterface {
           $source_plugin->checkRequirements();
         }
         catch (RequirementsException $e) {
-          $this->logger->error('Unable to execute migration @name: @message', [
-            '@name' => $migration->label(),
-            '@message' => $e->getMessage(),
-          ]);
+          if ($debug_mode) {
+            $this->logger->error('Unable to execute migration @name: @message', [
+              '@name' => $migration->label(),
+              '@message' => $e->getMessage(),
+            ]);
+          }
           unset($matched_migrations[$id]);
         }
       }

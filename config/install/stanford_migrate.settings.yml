@@ -1,4 +1,5 @@
 batch_limit: 50
+debug_mode: false
 cron_options:
   default:
     limit: 100
