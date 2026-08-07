@@ -129,6 +129,7 @@ class StanfordMigrateCsvImportFormTest extends StanfordMigrateKernelTestBase {
       'migration' => $migration,
     ];
     $request = new Request([], [], $attributes);
+    $request->server->set('REQUEST_TIME', \Drupal::time()->getRequestTime());
     $session = $this->createMock(SessionInterface::class);
     $request->setSession($session);
     \Drupal::requestStack()->push($request);
