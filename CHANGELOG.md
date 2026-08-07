@@ -1,5 +1,11 @@
 # Stanford Migrate
 
+9.2.1
+--------------------------------------------------------------------------------
+_Release Date: 2026-08-07_
+
+- Add debug_mode and gate "Unable to execute migration" warning behind debug_mode
+
 9.2.0
 --------------------------------------------------------------------------------
 _Release Date: 2025-11-03_
