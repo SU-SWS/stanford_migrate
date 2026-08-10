@@ -30,9 +30,6 @@
     },
     "extra": {
         "patches": {
-            "drupal/readonly_field_widget":{
-                "https://www.drupal.org/project/readonly_field_widget/issues/3220671": "https://www.drupal.org/files/issues/2024-09-23/third-party-settings-3220671-8.patch"
-            },
             "drupal/migrate_plus": {
                 "https://www.drupal.org/project/migrate_plus/issues/2837684": "https://www.drupal.org/files/issues/2023-01-13/2837684-14-migrate-plus-xml-return-as-xml.patch"
             }
