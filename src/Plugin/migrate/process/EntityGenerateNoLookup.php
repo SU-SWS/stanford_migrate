@@ -10,10 +10,6 @@ use Drupal\migrate_plus\Plugin\migrate\process\EntityGenerate;
 /**
  * This plugin generates entities within the process plugin.
  *
- * @MigrateProcessPlugin(
- *   id = "entity_generate_no_lookup"
- * )
- *
  * @see EntityLookup
  *
  * All the configuration from the lookup plugin applies here. In its most

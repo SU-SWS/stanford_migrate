@@ -15,11 +15,12 @@ use Drupal\migrate\Plugin\MigrateProcessInterface;
 use Drupal\migrate\Row;
 use Drupal\stanford_migrate\Plugin\migrate\process\StanfordFileImport;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Class StanfordFileImportTest.
- *
  */
+#[Group('stanford_migrate')]
 class StanfordFileImportTest extends UnitTestCase {
 
   /**

@@ -7,11 +7,14 @@ use Drupal\migrate\MigrateExecutable;
 use Drupal\node\Entity\Node;
 use Drupal\stanford_migrate\Plugin\migrate\id_map\StanfordSql;
 use Drupal\Tests\stanford_migrate\Kernel\StanfordMigrateKernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Class StanfordSqlTest.
- *
  */
+#[Group('stanford_migrate')]
+#[RunTestsInSeparateProcesses]
 class StanfordSqlTest extends StanfordMigrateKernelTestBase {
 
   /**

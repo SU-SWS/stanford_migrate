@@ -3,7 +3,6 @@
 namespace Drupal\Tests\stanford_migrate\Kernel\Form;
 
 use Drupal\Core\Form\FormState;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\file\Entity\File;
 use Drupal\migrate_plus\Entity\Migration;
 use Drupal\migrate_plus\Entity\MigrationGroup;
@@ -11,11 +10,14 @@ use Drupal\migrate_plus\Entity\MigrationInterface;
 use Drupal\Tests\stanford_migrate\Kernel\StanfordMigrateKernelTestBase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Class StanfordMigrateCsvImportFormTest.
- *
  */
+#[Group('stanford_migrate')]
+#[RunTestsInSeparateProcesses]
 class StanfordMigrateCsvImportFormTest extends StanfordMigrateKernelTestBase {
 
   /**
@@ -37,7 +39,7 @@ class StanfordMigrateCsvImportFormTest extends StanfordMigrateKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setup(): void {
+  protected function setUp(): void {
     parent::setUp();
     $this->installEntitySchema('file');
     $this->installSchema('file', ['file_usage']);
@@ -83,7 +85,7 @@ class StanfordMigrateCsvImportFormTest extends StanfordMigrateKernelTestBase {
     $this->assertTrue($form_state::hasAnyErrors());
 
     $f = fopen('public://import.csv', 'w');
-    fputcsv($f, ['foo', 'bar']);
+    fputcsv($f, ['foo', 'bar'], escape: '\\');
     fclose($f);
 
     $form_state->clearErrors();
@@ -91,7 +93,7 @@ class StanfordMigrateCsvImportFormTest extends StanfordMigrateKernelTestBase {
     $this->assertTrue($form_state::hasAnyErrors());
 
     $f = fopen('public://import.csv', 'w');
-    fputcsv($f, ['guid', 'title']);
+    fputcsv($f, ['guid', 'title'], escape: '\\');
     fclose($f);
 
     $form_state->clearErrors();

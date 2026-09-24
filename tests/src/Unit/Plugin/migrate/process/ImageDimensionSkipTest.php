@@ -7,11 +7,12 @@ use Drupal\migrate\MigrateSkipRowException;
 use Drupal\migrate\Row;
 use Drupal\stanford_migrate\Plugin\migrate\process\ImageDimensionSkip;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Class ImageDimensionSkipTest
- *
  */
+#[Group('stanford_migrate')]
 class ImageDimensionSkipTest extends UnitTestCase {
 
   /**

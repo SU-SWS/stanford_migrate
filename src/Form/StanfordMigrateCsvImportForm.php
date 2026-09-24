@@ -168,7 +168,7 @@ class StanfordMigrateCsvImportForm extends EntityForm {
     }
 
     $finput = fopen($file->getFileUri(), 'r');
-    $header = fgetcsv($finput);
+    $header = fgetcsv($finput, escape: '\\');
     fclose($finput);
 
     // Make sure the file isn't empty. fgetcsv will return false if the file is
@@ -253,7 +253,7 @@ class StanfordMigrateCsvImportForm extends EntityForm {
    *   Path to the CSV file.
    */
   protected function fixLineBreaks($csv_path) {
-    $reader = Reader::createFromPath($csv_path, 'r');
+    $reader = Reader::from($csv_path, 'r');
     $data = [];
     foreach ($reader as $row) {
       foreach ($row as &$column) {
@@ -264,7 +264,7 @@ class StanfordMigrateCsvImportForm extends EntityForm {
       }
       $data[] = $row;
     }
-    $writer = Writer::createFromPath($csv_path);
+    $writer = Writer::from($csv_path, 'r+');
     $writer->insertAll($data);
   }
 
@@ -305,7 +305,7 @@ class StanfordMigrateCsvImportForm extends EntityForm {
       catch (\Exception $e) {
         $this->messenger()
           ->addError($this->t('Unable to run migration import. See logs for more information'));
-        $this->logger($e->getMessage());
+        $this->logger('stanford_migrate')->error($e->getMessage());
       }
     }
   }

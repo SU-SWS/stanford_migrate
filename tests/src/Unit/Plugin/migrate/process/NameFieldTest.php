@@ -6,11 +6,12 @@ use Drupal\migrate\MigrateExecutable;
 use Drupal\migrate\Row;
 use Drupal\stanford_migrate\Plugin\migrate\process\NameField;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Class NameFieldTest.
- *
  */
+#[Group('stanford_migrate')]
 class NameFieldTest extends UnitTestCase {
 
   /**

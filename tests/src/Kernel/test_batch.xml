@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Items>
+  <Item>
+    <guid>one</guid>
+    <title>One</title>
+  </Item>
+  <Item>
+    <guid>two</guid>
+    <title>Two</title>
+  </Item>
+  <Item>
+    <guid>three</guid>
+    <title>Three</title>
+  </Item>
+</Items>

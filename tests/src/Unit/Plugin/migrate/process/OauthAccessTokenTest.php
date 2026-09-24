@@ -9,11 +9,12 @@ use Drupal\migrate_plus\AuthenticationPluginInterface;
 use Drupal\migrate_plus\AuthenticationPluginManager;
 use Drupal\stanford_migrate\Plugin\migrate\process\OauthAccessToken;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * class OauthAccessTokenTest.
- *
  */
+#[Group('stanford_migrate')]
 class OauthAccessTokenTest extends UnitTestCase {
 
   /**
@@ -26,7 +27,7 @@ class OauthAccessTokenTest extends UnitTestCase {
   /**
    * {@inheritDoc}
    */
-  public function setUp(): void {
+  protected function setUp(): void {
     parent::setUp();
     $auth_headers = ['headers' => ['Authorization' => 'Bearer foo-bar-baz']];
     $auth_plugin = $this->createMock(AuthenticationPluginInterface::class);
