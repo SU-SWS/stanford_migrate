@@ -26,6 +26,7 @@ class StanfordMigrateHooks {
    *
    * @codeCoverageIgnore
    */
+  #[Hook('help')]
   public function help($route_name, RouteMatchInterface $route_match) {
     // Main module help for the stanford_migrate module.
     if ($route_name == 'help.page.stanford_migrate') {

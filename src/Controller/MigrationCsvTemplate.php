@@ -70,7 +70,7 @@ class MigrationCsvTemplate extends ControllerBase {
 
     $file_name = $migration->id() . '.csv';
     $template = fopen(sys_get_temp_dir() . '/' . $file_name, 'w+');
-    fputcsv($template, $csv_headers);
+    fputcsv($template, $csv_headers, escape: '\\');
     fclose($template);
 
     $headers = [

@@ -6,15 +6,19 @@ use Drupal\migrate_plus\DataFetcherPluginManager;
 use Drupal\stanford_migrate\Plugin\migrate_plus\data_parser\LocalistJson;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Psr7\Stream;
 use GuzzleHttp\Psr7\Utils;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use PHPUnit\Framework\Attributes\Group;
 
+/**
+ * Tests LocalistJson.
+ */
+#[Group('stanford_migrate')]
 class LocalistJsonTest extends DataParserTestBase {
 
-  public function setup(): void {
+  protected function setUp(): void {
     parent::setUp();
     $client = $this->createMock(ClientInterface::class);
     $client->method('request')

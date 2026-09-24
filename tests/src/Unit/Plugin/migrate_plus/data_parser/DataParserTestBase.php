@@ -22,7 +22,7 @@ abstract class DataParserTestBase extends UnitTestCase {
   /**
    * {@inheritDoc}
    */
-  public function setup(): void {
+  protected function setUp(): void {
     parent::setUp();
 
     $data_fetcher = $this->createMock(DataFetcherPluginInterface::class);

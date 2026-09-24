@@ -4,17 +4,21 @@ namespace Drupal\Tests\stanford_migrate\Kernel;
 
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\user\RoleInterface;
+use Drupal\stanford_migrate\StanfordMigrate;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests for StanfordMigrate service.
- *
  */
+#[Group('stanford_migrate')]
+#[RunTestsInSeparateProcesses]
 class StanfordMigrateTest extends StanfordMigrateKernelTestBase {
 
   /**
    * {@inheritDoc}
    */
-  public function setup(): void {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->config('migrate_plus.migration.stanford_migrate')

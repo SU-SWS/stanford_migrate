@@ -3,16 +3,18 @@
 namespace Drupal\Tests\stanford_migrate\Kernel\Controller;
 
 use Drupal\migrate_plus\Entity\Migration;
-use Drupal\migrate_plus\Entity\MigrationGroup;
 use Drupal\stanford_migrate\Controller\MigrationCsvTemplate;
 use Drupal\Tests\stanford_migrate\Kernel\StanfordMigrateKernelTestBase;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Class MigrationCsvTemplateTest.
- *
  */
+#[Group('stanford_migrate')]
+#[RunTestsInSeparateProcesses]
 class MigrationCsvTemplateTest extends StanfordMigrateKernelTestBase {
 
   /**

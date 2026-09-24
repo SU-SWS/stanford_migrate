@@ -10,11 +10,13 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Messenger\MessengerTrait;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\stanford_migrate\StanfordMigrateInterface;
 
 class StanfordMigrateReadonlyFieldHooks {
 
   use MessengerTrait;
+  use StringTranslationTrait;
 
   /**
    */
@@ -85,7 +87,7 @@ class StanfordMigrateReadonlyFieldHooks {
 
       if ($processing) {
         $this->messenger()
-          ->addWarning(t('Some fields can not be edited since they contain imported & synced data.'));
+          ->addWarning($this->t('Some fields can not be edited since they contain imported & synced data.'));
 
         // If the default display is configured with some settings, let's use that
         // for the best display on the entity form. If it's not configured, the
@@ -97,7 +99,7 @@ class StanfordMigrateReadonlyFieldHooks {
 
           // Add the empty fields module settings to display a message.
           $component['settings']['formatter_third_party_settings']['empty_fields']['handler'] = 'text';
-          $component['settings']['formatter_third_party_settings']['empty_fields']['settings']['empty_text'] = '<em>' . t('No Data') . '</em>';
+          $component['settings']['formatter_third_party_settings']['empty_fields']['settings']['empty_text'] = '<em>' . $this->t('No Data') . '</em>';
           $component['settings']['formatter_third_party_settings']['stanford_migrate']['readonly'] = TRUE;
         }
         $component['type'] = 'readonly_field_widget';

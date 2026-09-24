@@ -8,11 +8,14 @@ use Drupal\stanford_migrate\Form\StanfordMigrateImportForm;
 use Drupal\Tests\stanford_migrate\Kernel\StanfordMigrateKernelTestBase;
 use Drupal\Tests\user\Traits\UserCreationTrait;
 use PHPUnit\Framework\Attributes\TestWith;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Class StanfordMigrateImportFormTest
- *
  */
+#[Group('stanford_migrate')]
+#[RunTestsInSeparateProcesses]
 class StanfordMigrateImportFormTest extends StanfordMigrateKernelTestBase {
 
   use UserCreationTrait;
@@ -20,7 +23,7 @@ class StanfordMigrateImportFormTest extends StanfordMigrateKernelTestBase {
   /**
    * {@inheritDoc}
    */
-  public function setup(): void {
+  protected function setUp(): void {
     parent::setUp();
     \Drupal::configFactory()
       ->getEditable('migrate_plus.migration.stanford_migrate')

@@ -16,10 +16,12 @@ use Drupal\stanford_migrate\Plugin\migrate\process\ImageResize;
 use Drupal\Tests\UnitTestCase;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests the ImageResize process plugin.
  */
+#[Group('stanford_migrate')]
 class ImageResizeTest extends UnitTestCase {
 
   /**

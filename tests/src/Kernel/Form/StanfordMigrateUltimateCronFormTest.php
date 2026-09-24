@@ -5,11 +5,14 @@ namespace Drupal\Tests\stanford_migrate\Kernel\Form;
 use Drupal\Core\Form\FormState;
 use Drupal\stanford_migrate\Form\StanfordMigrateUltimateCronForm;
 use Drupal\Tests\stanford_migrate\Kernel\StanfordMigrateKernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Class StanfordMigrateUltimateCronFormTest
- *
  */
+#[Group('stanford_migrate')]
+#[RunTestsInSeparateProcesses]
 class StanfordMigrateUltimateCronFormTest extends StanfordMigrateKernelTestBase {
 
   /**

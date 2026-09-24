@@ -6,11 +6,12 @@ use Drupal\migrate\MigrateExecutable;
 use Drupal\migrate\Row;
 use Drupal\stanford_migrate\Plugin\migrate\process\SmartDateAllDayAdjust;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Class SmartDateAllDayAdjust.
- *
  */
+#[Group('stanford_migrate')]
 class SmartDateAllDayAdjustTest extends UnitTestCase {
 
   /**

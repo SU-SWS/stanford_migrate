@@ -30,7 +30,7 @@ abstract class StanfordMigrateKernelTestBase extends KernelTestBase {
   /**
    * {@inheritDoc}
    */
-  public function setup(): void {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->installEntitySchema('user');

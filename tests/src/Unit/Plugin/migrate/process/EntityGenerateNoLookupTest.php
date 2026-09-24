@@ -16,11 +16,12 @@ use Drupal\migrate\Plugin\MigratePluginManager;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\migrate\Row;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Class EntityGenerateNoLookupTest.
- *
  */
+#[Group('stanford_migrate')]
 class EntityGenerateNoLookupTest extends UnitTestCase {
 
   /**

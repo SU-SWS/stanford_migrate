@@ -9,17 +9,18 @@ use Drupal\migrate\Plugin\Migration;
 use Drupal\migrate\Plugin\MigrationPluginManager;
 use Drupal\stanford_migrate\StanfordMigratePermissions;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Class StanfordMigratePermissionsTest.
- *
  */
+#[Group('stanford_migrate')]
 class StanfordMigratePermissionsTest extends UnitTestCase {
 
   /**
    * {@inheritDoc}
    */
-  public function setup(): void {
+  protected function setUp(): void {
     parent::setUp();
 
     $migration = $this->createMock(Migration::class);

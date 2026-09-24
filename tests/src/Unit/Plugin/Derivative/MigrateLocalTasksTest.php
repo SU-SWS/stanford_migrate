@@ -6,11 +6,12 @@ use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\stanford_migrate\Plugin\Derivative\MigrateLocalTasks;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Class MigrateLocalTasksTest.
- *
  */
+#[Group('stanford_migrate')]
 class MigrateLocalTasksTest extends UnitTestCase {
 
   /**
@@ -23,7 +24,7 @@ class MigrateLocalTasksTest extends UnitTestCase {
   /**
    * {@inheritDoc}
    */
-  public function setup(): void {
+  protected function setUp(): void {
     parent::setUp();
 
     $module_handler = $this->createMock(ModuleHandlerInterface::class);

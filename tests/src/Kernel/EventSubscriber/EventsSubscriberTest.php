@@ -5,13 +5,21 @@ namespace Drupal\Tests\stanford_migrate\Kernel\EventSubscriber;
 use Drupal\migrate\MigrateExecutable;
 use Drupal\migrate\Plugin\MigrateIdMapInterface;
 use Drupal\Tests\stanford_migrate\Kernel\StanfordMigrateKernelTestBase;
+use Drupal\stanford_migrate\EventSubscriber\EventsSubscriber;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
+/**
+ * Tests EventsSubscriber.
+ */
+#[Group('stanford_migrate')]
+#[RunTestsInSeparateProcesses]
 class EventsSubscriberTest extends StanfordMigrateKernelTestBase {
 
   /**
    * {@inheritdoc}
    */
-  public function setup(): void {
+  protected function setUp(): void {
     parent::setUp();
     \Drupal::configFactory()
       ->getEditable('migrate_plus.migration.stanford_migrate')

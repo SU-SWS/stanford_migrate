@@ -4,11 +4,14 @@ namespace Drupal\Tests\stanford_migrate\Kernel\Config;
 
 use Drupal\file\Entity\File;
 use Drupal\Tests\stanford_migrate\Kernel\StanfordMigrateKernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Class MigrationConfigOverridesTest.
- *
  */
+#[Group('stanford_migrate')]
+#[RunTestsInSeparateProcesses]
 class MigrationConfigOverridesTest extends StanfordMigrateKernelTestBase {
 
   /**
@@ -29,7 +32,7 @@ class MigrationConfigOverridesTest extends StanfordMigrateKernelTestBase {
   /**
    * {@inheritDoc}
    */
-  public function setup(): void {
+  protected function setUp(): void {
     parent::setUp();
     $this->installEntitySchema('file');
   }

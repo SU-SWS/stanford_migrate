@@ -10,11 +10,13 @@ use Drupal\stanford_migrate\Plugin\migrate\process\StanfordDownload;
 use Drupal\Tests\migrate\Kernel\process\DownloadTest;
 use GuzzleHttp\Client;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the StanfordDownload process plugin.
  */
 #[Group('stanford_migrate')]
+#[RunTestsInSeparateProcesses]
 class StanfordDownloadTest extends DownloadTest {
 
   /**

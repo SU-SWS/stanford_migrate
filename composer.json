@@ -15,15 +15,16 @@
     ],
     "require": {
         "php": ">=8.3",
-        "drupal/core": "^11.1",
+        "drupal/core": "^11.1 || ^12",
         "drupal/empty_fields": "^1.0@beta",
         "drupal/migrate_file": "^2.0 || ^3.0",
-        "drupal/migrate_plus": "^6.0",
+        "drupal/migrate_plus": "^6.0.9",
         "drupal/migrate_source_csv": "^3.4",
         "drupal/migrate_tools": "^6.1",
         "drupal/readonly_field_widget": "^2.1",
         "drupal/ultimate_cron": "^2.0@alpha",
-        "joshfraser/php-name-parser": "dev-master"
+        "joshfraser/php-name-parser": "dev-master",
+        "league/csv": "^9.27"
     },
     "require-dev": {
         "drupal/entity_reference_revisions": "^1.9"

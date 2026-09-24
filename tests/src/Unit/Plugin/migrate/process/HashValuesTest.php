@@ -6,11 +6,12 @@ use Drupal\migrate\MigrateExecutable;
 use Drupal\migrate\Row;
 use Drupal\stanford_migrate\Plugin\migrate\process\HashValues;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Class HashValuesTest.
- *
  */
+#[Group('stanford_migrate')]
 class HashValuesTest extends UnitTestCase {
 
   /**

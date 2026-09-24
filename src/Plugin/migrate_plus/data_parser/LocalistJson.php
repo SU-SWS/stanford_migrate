@@ -2,16 +2,17 @@
 
 namespace Drupal\stanford_migrate\Plugin\migrate_plus\data_parser;
 
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\migrate_plus\Attribute\DataParser;
 use Drupal\migrate_plus\Plugin\migrate_plus\data_parser\Json;
 
 /**
  * Obtain JSON data for migration.
- *
- * @DataParser(
- *   id = "localist_json",
- *   title = @Translation("Localist JSON")
- * )
  */
+#[DataParser(
+  id: 'localist_json',
+  title: new TranslatableMarkup('Localist JSON'),
+)]
 class LocalistJson extends Json {
 
   /**
