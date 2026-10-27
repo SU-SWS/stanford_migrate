@@ -20,6 +20,16 @@ class StanfordUrl extends Url {
   protected $gettingIds = FALSE;
 
   /**
+   * Get the urls the source will fetch data from.
+   *
+   * @return string[]
+   *   List of source urls.
+   */
+  public function getSourceUrls(): array {
+    return $this->sourceUrls;
+  }
+
+  /**
    * Get all ids that exist in the current source.
    *
    * @return array
