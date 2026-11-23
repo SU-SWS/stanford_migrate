@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Class MigrationCsvTemplate.
+ * Provides a downloadable CSV template for a CSV migration.
  *
  * @package Drupal\stanford_migrate\Controller
  */
@@ -38,7 +38,7 @@ class MigrationCsvTemplate extends ControllerBase {
    * @param \Drupal\migrate\Plugin\MigrationPluginManagerInterface $migration_manager
    *   Migration plugin manager service.
    */
-  public function __construct(MigrationPluginManagerInterface $migration_manager) {
+  final public function __construct(MigrationPluginManagerInterface $migration_manager) {
     $this->migrationManager = $migration_manager;
   }
 

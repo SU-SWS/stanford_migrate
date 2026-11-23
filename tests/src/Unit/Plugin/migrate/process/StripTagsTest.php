@@ -9,7 +9,7 @@ use Drupal\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Class StripTagsTest
+ * Tests the strip tags process plugin.
  */
 #[Group('stanford_migrate')]
 class StripTagsTest extends UnitTestCase {

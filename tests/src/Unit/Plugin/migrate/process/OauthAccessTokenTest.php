@@ -12,7 +12,7 @@ use Drupal\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * class OauthAccessTokenTest.
+ * Tests the OAuth access token process plugin.
  */
 #[Group('stanford_migrate')]
 class OauthAccessTokenTest extends UnitTestCase {

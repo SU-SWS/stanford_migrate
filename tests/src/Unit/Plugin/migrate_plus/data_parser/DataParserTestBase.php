@@ -8,13 +8,15 @@ use Drupal\migrate_plus\DataFetcherPluginManager;
 use Drupal\Tests\UnitTestCase;
 
 /**
- * Class DataParserTestBase
+ * Base class for migrate_plus data parser plugin unit tests.
  *
  * @package Drupal\Tests\stanford_migrate\Unit\Plugin\migrate_plus\data_parser
  */
 abstract class DataParserTestBase extends UnitTestCase {
 
   /**
+   * Content the mocked data fetcher returns.
+   *
    * @var mixed
    */
   protected $dataFetcherContent;

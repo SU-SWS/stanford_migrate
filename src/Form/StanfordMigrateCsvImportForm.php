@@ -20,7 +20,7 @@ use League\Csv\Writer;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class StanfordMigrateCsvImportForm.
+ * Form to upload a CSV file and import it with a CSV migration.
  *
  * @package Drupal\stanford_migrate\Form
  */
@@ -51,16 +51,22 @@ class StanfordMigrateCsvImportForm extends EntityForm {
   /**
    * StanfordMigrateCsvImportForm constructor.
    *
-   * @param \Drupal\migrate\Plugin\MigrationPluginManagerInterface $migrationManager
-   *   Migration plugin manager service.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   Entity type manager service.
    * @param \Drupal\Core\State\StateInterface $state
    *   Core state service.
    * @param \Drupal\file\FileUsage\FileUsageInterface $fileUsage
    *   File module usage service.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
-   *   Entity type manager service.
+   * @param \Drupal\migrate\Plugin\MigrationPluginManagerInterface $migrationManager
+   *   Migration plugin manager service.
+   * @param \Drupal\Core\KeyValueStore\KeyValueFactoryInterface $keyValue
+   *   Key value factory service.
+   * @param \Drupal\Component\Datetime\TimeInterface $time
+   *   Time service.
+   * @param \Drupal\Core\StringTranslation\TranslationManager $translation
+   *   String translation service.
    */
-  public function __construct(
+  final public function __construct(
     EntityTypeManagerInterface $entityTypeManager,
     protected StateInterface $state,
     protected FileUsageInterface $fileUsage,
@@ -179,7 +185,7 @@ class StanfordMigrateCsvImportForm extends EntityForm {
     }
 
     $migration_fields = $this->migrationPlugin->getSourceConfiguration()['fields'];
-    array_walk($migration_fields, function(&$field) {
+    array_walk($migration_fields, function (&$field) {
       $field = $field['selector'];
     });
 
@@ -204,7 +210,7 @@ class StanfordMigrateCsvImportForm extends EntityForm {
    */
   public function save(array $form, FormStateInterface $form_state) {
     if ($form_state::hasAnyErrors()) {
-      return;
+      return SAVED_UPDATED;
     }
 
     $this->migrationPlugin->getIdMap()->prepareUpdate();
@@ -244,6 +250,7 @@ class StanfordMigrateCsvImportForm extends EntityForm {
       // Track the file usage on the migration.
       $this->fileUsage->add($file, 'stanford_migrate', 'migration', $migration_id);
     }
+    return SAVED_UPDATED;
   }
 
   /**

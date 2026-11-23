@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Class UrlCheckTest.
+ * Tests the url check process plugin.
  */
 #[Group('stanford_migrate')]
 class UrlCheckTest extends UnitTestCase {

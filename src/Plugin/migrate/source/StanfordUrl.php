@@ -66,7 +66,6 @@ class StanfordUrl extends Url {
       $plugin = $this->getDataParserPlugin();
       $row_data['current_feed_url'] = $plugin->currentUrl();
       // End new custom code.
-
       $this->fetchNextRow();
       $row = new Row($row_data, $this->getIds());
 

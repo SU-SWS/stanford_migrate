@@ -77,7 +77,7 @@ class ImageResize extends ProcessPluginBase implements ContainerFactoryPluginInt
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, protected FileSystemInterface $fileSystem, protected EntityTypeManagerInterface $entityTypeManager) {
+  final public function __construct(array $configuration, $plugin_id, $plugin_definition, protected FileSystemInterface $fileSystem, protected EntityTypeManagerInterface $entityTypeManager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
 

@@ -53,7 +53,7 @@ class EntityGenerateNoLookup extends EntityGenerate {
     $parts = explode('/', $destinationProperty);
     $destinationProperty = reset($parts);
     $this->determineLookupProperties($destinationProperty);
-    $this->destinationProperty = isset($this->configuration['destination_field']) ? $this->configuration['destination_field'] : NULL;
+    $this->destinationProperty = $this->configuration['destination_field'] ?? NULL;
     return $this->generateEntity($value);
   }
 

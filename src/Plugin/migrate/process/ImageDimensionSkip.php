@@ -103,6 +103,7 @@ class ImageDimensionSkip extends ProcessPluginBase {
       $valid_height = empty($this->configuration['height']) ? TRUE : $this->configuration['height'] <= $height;
       return $valid_height && $valid_width;
     }
+    return FALSE;
   }
 
   /**

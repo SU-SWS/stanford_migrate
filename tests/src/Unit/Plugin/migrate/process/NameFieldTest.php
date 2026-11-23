@@ -9,7 +9,7 @@ use Drupal\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Class NameFieldTest.
+ * Tests the name field process plugin.
  */
 #[Group('stanford_migrate')]
 class NameFieldTest extends UnitTestCase {

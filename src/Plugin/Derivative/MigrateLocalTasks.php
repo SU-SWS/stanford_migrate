@@ -8,7 +8,7 @@ use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class MigrateLocalTasks.
+ * Adds a CSV upload local task to migration entities.
  *
  * @package Drupal\stanford_migrate\Plugin\Derivative
  */
@@ -36,7 +36,7 @@ class MigrateLocalTasks extends DeriverBase implements ContainerDeriverInterface
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   Core module handler service.
    */
-  public function __construct(ModuleHandlerInterface $module_handler) {
+  final public function __construct(ModuleHandlerInterface $module_handler) {
     $this->moduleHandler = $module_handler;
   }
 

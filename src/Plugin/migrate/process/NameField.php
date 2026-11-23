@@ -3,7 +3,6 @@
 namespace Drupal\stanford_migrate\Plugin\migrate\process;
 
 use Drupal\migrate\Attribute\MigrateProcess;
-use FullNameParser;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
@@ -26,7 +25,7 @@ class NameField extends ProcessPluginBase {
    * {@inheritdoc}
    */
   public function transform($value, MigrateExecutableInterface $migrate_executable, Row $row, $destination_property) {
-    $name = FullNameParser::parse($value);
+    $name = \FullNameParser::parse($value);
     $name = [
       'title' => $name['salutation'],
       'given' => !empty($name['fname']) ? $name['fname'] : $name['initials'],

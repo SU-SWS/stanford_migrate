@@ -50,7 +50,7 @@ class SmartDateAllDayAdjustTest extends UnitTestCase {
     $this->assertEquals($timestamp + 60 * 60 * 24 - 60, $new_value);
 
     // The end value is midnight of the next day, so it should be adjusted to
-    // 1 minute prior for it to be "all day"
+    // 1 minute prior for it to be "all day".
     $end_timestamp = strtotime('Jan 11 2020 12:00am');
     $end_value = date('c', $end_timestamp);
     $new_value = $plugin->transform($end_value, $migrate_executable, $row, '');

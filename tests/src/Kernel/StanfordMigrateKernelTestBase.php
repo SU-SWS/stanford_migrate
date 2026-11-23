@@ -6,7 +6,7 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
 
 /**
- * Class StanfordMigrateKernelTestBase.
+ * Base class for Stanford Migrate kernel tests.
  */
 abstract class StanfordMigrateKernelTestBase extends KernelTestBase {
 

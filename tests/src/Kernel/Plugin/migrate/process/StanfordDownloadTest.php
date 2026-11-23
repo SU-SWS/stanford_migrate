@@ -24,6 +24,9 @@ class StanfordDownloadTest extends DownloadTest {
    */
   protected static $modules = ['system', 'file'];
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
     $this->installConfig('file');
@@ -48,8 +51,9 @@ class StanfordDownloadTest extends DownloadTest {
     $destination_uri = 'public://Test   File & Special-Characters.txt';
     $actual_destination = $this->doTransform($destination_uri);
 
-    // The plugin should process the filename through the FileUploadSanitizeNameEvent.
-    // Verify that the file was created at a valid location.
+    // The plugin should process the filename through the
+    // FileUploadSanitizeNameEvent. Verify that the file was created at a valid
+    // location.
     $this->assertFileExists($actual_destination);
     $this->assertEquals('public://test-file-special-characters.txt', $actual_destination);
   }
@@ -178,6 +182,9 @@ class StanfordDownloadTest extends DownloadTest {
     return $return;
   }
 
+  /**
+   * Skip the parent test of a write protected destination.
+   */
   public function testWriteProtectedDestination(): void {
     $this->markTestSkipped('Disable base test');
   }

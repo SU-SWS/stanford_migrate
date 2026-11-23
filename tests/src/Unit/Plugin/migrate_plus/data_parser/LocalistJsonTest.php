@@ -18,6 +18,9 @@ use PHPUnit\Framework\Attributes\Group;
 #[Group('stanford_migrate')]
 class LocalistJsonTest extends DataParserTestBase {
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
     $client = $this->createMock(ClientInterface::class);
@@ -28,6 +31,9 @@ class LocalistJsonTest extends DataParserTestBase {
     \Drupal::setContainer($container);
   }
 
+  /**
+   * Tests the paged urls built from the Localist page totals.
+   */
   public function testJsonParser() {
     $fetcherPluginManager = $this->createMock(DataFetcherPluginManager::class);
 
@@ -52,6 +58,9 @@ class LocalistJsonTest extends DataParserTestBase {
     $this->assertEquals($expected, $plugin->getUrls());
   }
 
+  /**
+   * Mock http client response with the page totals for the test urls.
+   */
   public function getClientResponse($method, $uri, array $options = []) {
     $data = [];
 
@@ -76,8 +85,14 @@ class LocalistJsonTest extends DataParserTestBase {
 
 }
 
+/**
+ * Localist JSON parser that exposes the paged urls for testing.
+ */
 class TestLocalistJson extends LocalistJson {
 
+  /**
+   * Get the paged urls built from the configured urls.
+   */
   public function getUrls() {
     $urls = [];
 

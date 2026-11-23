@@ -9,7 +9,7 @@ use Drupal\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Class HashValuesTest.
+ * Tests the hash values process plugin.
  */
 #[Group('stanford_migrate')]
 class HashValuesTest extends UnitTestCase {

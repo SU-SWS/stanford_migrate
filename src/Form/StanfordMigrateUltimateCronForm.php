@@ -8,7 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class StanfordMigrateUltimateCronForm.
+ * Lists migration cron jobs and creates the missing ones.
  *
  * @package Drupal\stanford_migrate\Form
  */
@@ -36,7 +36,7 @@ class StanfordMigrateUltimateCronForm extends FormBase {
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   Entity type manager service.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
+  final public function __construct(EntityTypeManagerInterface $entity_type_manager) {
     $this->entityTypeManager = $entity_type_manager;
   }
 

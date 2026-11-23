@@ -1,4 +1,5 @@
 name: Test Stanford Migrate
+description: 'Test module with migrations for Stanford Migrate tests.'
 type: module
 core_version_requirement: ^8.8 || ^9
 package: 'Testing'

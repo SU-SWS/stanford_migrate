@@ -19,7 +19,7 @@ use Drupal\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Class EntityGenerateNoLookupTest.
+ * Tests the entity generate no lookup process plugin.
  */
 #[Group('stanford_migrate')]
 class EntityGenerateNoLookupTest extends UnitTestCase {

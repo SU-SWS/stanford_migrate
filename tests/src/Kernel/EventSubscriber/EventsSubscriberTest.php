@@ -5,7 +5,6 @@ namespace Drupal\Tests\stanford_migrate\Kernel\EventSubscriber;
 use Drupal\migrate\MigrateExecutable;
 use Drupal\migrate\Plugin\MigrateIdMapInterface;
 use Drupal\Tests\stanford_migrate\Kernel\StanfordMigrateKernelTestBase;
-use Drupal\stanford_migrate\EventSubscriber\EventsSubscriber;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
@@ -118,7 +117,8 @@ class EventsSubscriberTest extends StanfordMigrateKernelTestBase {
       if ($row['source_row_status'] == MigrateIdMapInterface::STATUS_IGNORED) {
         $number_ignored++;
       }
-      $id_map->next();;
+      $id_map->next();
+
     }
     $this->assertGreaterThanOrEqual(2, $id_map->processedCount());
     $this->assertGreaterThanOrEqual(1, $number_ignored);
