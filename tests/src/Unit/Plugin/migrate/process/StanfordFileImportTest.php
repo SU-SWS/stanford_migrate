@@ -18,7 +18,7 @@ use Drupal\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Class StanfordFileImportTest.
+ * Tests the Stanford file import process plugin.
  */
 #[Group('stanford_migrate')]
 class StanfordFileImportTest extends UnitTestCase {

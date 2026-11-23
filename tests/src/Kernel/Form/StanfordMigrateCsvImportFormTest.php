@@ -14,7 +14,7 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * Class StanfordMigrateCsvImportFormTest.
+ * Tests the CSV upload and import form.
  */
 #[Group('stanford_migrate')]
 #[RunTestsInSeparateProcesses]
@@ -124,6 +124,7 @@ class StanfordMigrateCsvImportFormTest extends StanfordMigrateKernelTestBase {
    * Set the current request on the request stack to have a migration entity.
    *
    * @param \Drupal\migrate_plus\Entity\MigrationInterface $migration
+   *   Migration entity to put on the request.
    */
   protected function setMigrationRequest(MigrationInterface $migration) {
     $attributes = [

@@ -51,7 +51,7 @@ class OauthAccessToken extends ProcessPluginBase implements ContainerFactoryPlug
   /**
    * {@inheritDoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, AuthenticationPluginManager $auth_manager) {
+  final public function __construct(array $configuration, $plugin_id, $plugin_definition, AuthenticationPluginManager $auth_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->authPluginManager = $auth_manager;
   }

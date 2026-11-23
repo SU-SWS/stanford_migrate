@@ -12,7 +12,7 @@ use Drupal\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Class StanfordMigratePermissionsTest.
+ * Tests the per-migration import permissions.
  */
 #[Group('stanford_migrate')]
 class StanfordMigratePermissionsTest extends UnitTestCase {

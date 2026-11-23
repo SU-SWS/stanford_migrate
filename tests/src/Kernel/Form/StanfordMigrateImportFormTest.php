@@ -12,7 +12,7 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * Class StanfordMigrateImportFormTest
+ * Tests the migration import form.
  */
 #[Group('stanford_migrate')]
 #[RunTestsInSeparateProcesses]

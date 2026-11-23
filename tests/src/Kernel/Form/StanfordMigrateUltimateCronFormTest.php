@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * Class StanfordMigrateUltimateCronFormTest
+ * Tests the form that creates migration cron jobs.
  */
 #[Group('stanford_migrate')]
 #[RunTestsInSeparateProcesses]

@@ -8,7 +8,7 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * Class MigrationConfigOverridesTest.
+ * Tests the CSV file path override of migration config.
  */
 #[Group('stanford_migrate')]
 #[RunTestsInSeparateProcesses]

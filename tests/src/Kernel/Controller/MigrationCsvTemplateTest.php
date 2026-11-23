@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * Class MigrationCsvTemplateTest.
+ * Tests the CSV template download controller.
  */
 #[Group('stanford_migrate')]
 #[RunTestsInSeparateProcesses]

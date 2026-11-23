@@ -4,7 +4,6 @@ namespace Drupal\Tests\stanford_migrate\Kernel;
 
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\user\RoleInterface;
-use Drupal\stanford_migrate\StanfordMigrate;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
@@ -35,6 +34,9 @@ class StanfordMigrateTest extends StanfordMigrateKernelTestBase {
     user_role_grant_permissions(RoleInterface::AUTHENTICATED_ID, ['import stanford_migrate migration']);
   }
 
+  /**
+   * Tests the config readonly whitelist patterns for CSV migrations.
+   */
   public function testConfigReadonly() {
     $patterns = $this->container->get('module_handler')
       ->invoke('stanford_migrate', 'config_readonly_whitelist_patterns');
@@ -235,6 +237,9 @@ class StanfordMigrateTest extends StanfordMigrateKernelTestBase {
       ->getMigrationList());
   }
 
+  /**
+   * Tests imported fields are readonly on the entity edit form.
+   */
   public function testReadonlyFields() {
     /** @var \Drupal\stanford_migrate\StanfordMigrateInterface $service */
     $service = $this->container->get('stanford_migrate');

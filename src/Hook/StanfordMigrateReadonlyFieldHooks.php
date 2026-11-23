@@ -13,12 +13,23 @@ use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\stanford_migrate\StanfordMigrateInterface;
 
+/**
+ * Hooks that make imported fields readonly on entity edit forms.
+ */
 class StanfordMigrateReadonlyFieldHooks {
 
   use MessengerTrait;
   use StringTranslationTrait;
 
   /**
+   * Construct the readonly field hooks service.
+   *
+   * @param \Drupal\stanford_migrate\StanfordMigrateInterface $stanfordMigrate
+   *   Stanford migrate service.
+   * @param \Drupal\Core\Routing\RouteMatchInterface $routeMatch
+   *   Current route match.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   Entity type manager service.
    */
   public function __construct(protected StanfordMigrateInterface $stanfordMigrate, protected RouteMatchInterface $routeMatch, protected EntityTypeManagerInterface $entityTypeManager) {}
 
@@ -52,8 +63,8 @@ class StanfordMigrateReadonlyFieldHooks {
         continue;
       }
 
-      // When edit an existing node that was imported via migrate module, mark the
-      // fields that are mapped from migration as readonly.
+      // When edit an existing node that was imported via migrate module, mark
+      // the fields that are mapped from migration as readonly.
       $field_definition = $field_definitions[$field_name];
       $columns = $field_definition->getFieldStorageDefinition()->getColumns();
       $processing = !empty($migration->getProcess()[$field_name]) || !empty($migration->getProcess()["$field_name/0"]);
@@ -89,9 +100,10 @@ class StanfordMigrateReadonlyFieldHooks {
         $this->messenger()
           ->addWarning($this->t('Some fields can not be edited since they contain imported & synced data.'));
 
-        // If the default display is configured with some settings, let's use that
-        // for the best display on the entity form. If it's not configured, the
-        // readonly_field_widget module will use some default display settings.
+        // If the default display is configured with some settings, let's use
+        // that for the best display on the entity form. If it's not configured,
+        // the readonly_field_widget module will use some default display
+        // settings.
         if ($display_component = $default_display?->getComponent($field_name)) {
           $component['settings']['formatter_type'] = $display_component['type'];
           $component['settings']['formatter_settings'][$display_component['type']] = $display_component['settings'];
@@ -114,8 +126,8 @@ class StanfordMigrateReadonlyFieldHooks {
   #[Hook('preprocess_field')]
   public function preprocessField(&$variables) {
     if ($variables['element']['#third_party_settings']['stanford_migrate']['readonly'] ?? FALSE) {
-      // Wrap the readonly form fields with classes so that they can be identified
-      // more easily to the user.
+      // Wrap the readonly form fields with classes so that they can be
+      // identified more easily to the user.
       $variables['attributes']['class'][] = 'messages';
       $variables['attributes']['class'][] = 'messages--warning';
       $variables['attributes']['class'][] = 'messages--readonly';

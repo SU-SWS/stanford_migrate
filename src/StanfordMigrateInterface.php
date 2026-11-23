@@ -7,6 +7,9 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\node\NodeInterface;
 
+/**
+ * Service for running migrations and finding the migration of an entity.
+ */
 interface StanfordMigrateInterface {
 
   /**
@@ -56,13 +59,15 @@ interface StanfordMigrateInterface {
   /**
    * Get the migration that imported the given node.
    *
-   * @deprecated in stanford_media:9.1.0 and is removed from 10.0.0. Use getEntityMigration().
-   *
    * @param \Drupal\node\NodeInterface $node
    *   Node entity.
    *
    * @return \Drupal\migrate\Plugin\MigrationInterface|null
    *   Migration entity or null if none found.
+   *
+   * @deprecated in stanford_migrate:9.1.0 and is removed from
+   *   stanford_migrate:10.0.0. Use getEntityMigration() instead.
+   * @see \Drupal\stanford_migrate\StanfordMigrateInterface::getEntityMigration()
    */
   public function getNodesMigration(NodeInterface $node): ?MigrationInterface;
 

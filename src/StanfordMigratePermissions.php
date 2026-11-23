@@ -9,7 +9,7 @@ use Drupal\migrate\Plugin\MigrationPluginManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class StanfordMigratePermissions.
+ * Provides an import permission for each migration.
  *
  * @package Drupal\stanford_migrate
  */
@@ -44,7 +44,7 @@ class StanfordMigratePermissions implements ContainerInjectionInterface {
    *
    * @throws \Drupal\Component\Plugin\Exception\PluginException
    */
-  public function __construct(MigrationPluginManagerInterface $migrations_manager, EntityTypeManagerInterface $entityTypeManager) {
+  final public function __construct(MigrationPluginManagerInterface $migrations_manager, EntityTypeManagerInterface $entityTypeManager) {
     /** @var \Drupal\migrate_plus\Entity\Migration[] $migration_entities */
     $migration_entities = $entityTypeManager->getStorage('migration')
       ->loadMultiple();

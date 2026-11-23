@@ -9,7 +9,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\State\StateInterface;
 
 /**
- * Class MigrationConfigOverrides.
+ * Point CSV migrations at the most recently uploaded CSV file.
  *
  * @package Drupal\stanford_migrate\Config
  */

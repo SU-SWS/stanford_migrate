@@ -10,7 +10,7 @@ use Drupal\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Class ImageDimensionSkipTest
+ * Tests the image dimension skip process plugin.
  */
 #[Group('stanford_migrate')]
 class ImageDimensionSkipTest extends UnitTestCase {
@@ -31,6 +31,9 @@ class ImageDimensionSkipTest extends UnitTestCase {
     $this->assertEquals($value, $plugin->transform($value, $migrate, $row, ''));
   }
 
+  /**
+   * A value that has no image dimensions should skip the row.
+   */
   public function testNonUrl() {
     $plugin = new TestImageDimensionSkip([
       'width' => 100,
@@ -84,8 +87,14 @@ class ImageDimensionSkipTest extends UnitTestCase {
 
 }
 
+/**
+ * Image dimension skip plugin that reads dimensions from the value itself.
+ */
 class TestImageDimensionSkip extends ImageDimensionSkip {
 
+  /**
+   * {@inheritdoc}
+   */
   protected function getImageSize(string $url): bool|array {
     return str_contains($url, 'x') ? explode('x', $url) : FALSE;
   }

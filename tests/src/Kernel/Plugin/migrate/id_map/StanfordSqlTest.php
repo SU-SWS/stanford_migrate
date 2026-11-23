@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * Class StanfordSqlTest.
+ * Tests the Stanford SQL id map plugin override.
  */
 #[Group('stanford_migrate')]
 #[RunTestsInSeparateProcesses]

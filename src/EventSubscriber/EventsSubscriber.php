@@ -14,7 +14,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 
 /**
- * Class EventsSubscriber.
+ * Deletes or unpublishes orphaned entities after a migration import.
  */
 class EventsSubscriber implements EventSubscriberInterface {
 

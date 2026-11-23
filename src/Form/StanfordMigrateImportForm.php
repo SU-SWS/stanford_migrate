@@ -19,7 +19,7 @@ use Drupal\migrate\MigrateMessage;
 use Drupal\migrate\Plugin\MigrationInterface;
 
 /**
- * Class StanfordMigrateImportForm.
+ * Lists migrations the user may run with a button to import each.
  *
  * @package Drupal\stanford_migrate\Form
  */
@@ -56,7 +56,7 @@ class StanfordMigrateImportForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function __construct(
+  final public function __construct(
     protected DateFormatterInterface $dateFormatter,
     protected AccountProxyInterface $account,
     protected MigrationPluginManagerInterface $migrationManager,

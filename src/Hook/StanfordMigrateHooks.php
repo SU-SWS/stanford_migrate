@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\stanford_migrate\Hook;
 
-use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -13,11 +12,20 @@ use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\stanford_migrate\StanfordMigrateInterface;
 
+/**
+ * General hook implementations for the Stanford Migrate module.
+ */
 class StanfordMigrateHooks {
 
   use StringTranslationTrait;
 
   /**
+   * Construct the hooks service.
+   *
+   * @param \Drupal\stanford_migrate\StanfordMigrateInterface $stanfordMigrate
+   *   Stanford migrate service.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
+   *   Module handler service.
    */
   public function __construct(protected StanfordMigrateInterface $stanfordMigrate, protected ModuleHandlerInterface $moduleHandler) {}
 
@@ -38,14 +46,16 @@ class StanfordMigrateHooks {
   }
 
   /**
-   * When an entity is manually deleted from the database, we want to remove it
-   * from the migration mapping.
+   * Remove a manually deleted entity from the migration mapping.
    */
   #[Hook('entity_delete')]
   public function entityDelete(EntityInterface $entity) {
     $this->stanfordMigrate->deleteEntityFromMigration($entity);
   }
 
+  /**
+   * Clear the migration cache of a content entity when it is updated.
+   */
   #[Hook('entity_update')]
   public function entityUpdate(EntityInterface $entity) {
     if ($entity instanceof ContentEntityInterface) {

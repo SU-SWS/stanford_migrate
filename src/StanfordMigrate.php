@@ -58,7 +58,7 @@ class StanfordMigrate implements StanfordMigrateInterface {
    *   Entity type manager service.
    * @param \Drupal\migrate\Plugin\MigrationPluginManagerInterface $migrationPluginManager
    *   Migration plugin manager service.
-   * @param \Drupal\Core\KeyValueStore\KeyValueFactoryInterface $keyValue ,
+   * @param \Drupal\Core\KeyValueStore\KeyValueFactoryInterface $keyValue
    *   Core key value service.
    * @param \Drupal\Component\Datetime\TimeInterface $time
    *   Time service.
@@ -121,7 +121,7 @@ class StanfordMigrate implements StanfordMigrateInterface {
     $definition = $migration->getPluginDefinition();
     $required_migrations = $definition['migration_dependencies']['required'] ?? [];
 
-    $required_migrations = array_filter($required_migrations, function($value) use ($executed_migrations) {
+    $required_migrations = array_filter($required_migrations, function ($value) use ($executed_migrations) {
       return !isset($executed_migrations[$value]);
     });
 
@@ -136,7 +136,6 @@ class StanfordMigrate implements StanfordMigrateInterface {
     }
 
     // Finally run this migration.
-
     $log = new MigrateMessage();
 
     if ($this->batchExecuteMigrations) {
@@ -219,7 +218,8 @@ class StanfordMigrate implements StanfordMigrateInterface {
     // Loop through the migration entities, build their migration plugins so
     // that we can dig into their source mapping data.
     foreach ($migrations as $migrate) {
-      // CSV Imported content can be ignored since it's normally a one time thing.
+      // CSV Imported content can be ignored since it's normally a one time
+      // thing.
       if (!$migrate || $migrate->getSourcePlugin()->getPluginId() == 'csv') {
         continue;
       }
@@ -248,7 +248,7 @@ class StanfordMigrate implements StanfordMigrateInterface {
    * @codeCoverageIgnore
    */
   public function getNodesMigration(NodeInterface $node): ?MigrationInterface {
-    @trigger_error('getNodesMigration is deprecated in stanford_media:9.1.0 and is removed from 10.0.0. Use getEntityMigration()', E_USER_DEPRECATED);
+    @trigger_error('getNodesMigration() is deprecated in stanford_migrate:9.1.0 and is removed from stanford_migrate:10.0.0. Use getEntityMigration() instead. See https://github.com/SU-SWS/stanford_migrate', E_USER_DEPRECATED);
     return $this->getEntityMigration($node);
   }
 

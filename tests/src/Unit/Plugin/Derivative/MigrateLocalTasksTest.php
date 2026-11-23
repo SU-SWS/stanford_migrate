@@ -9,7 +9,7 @@ use Drupal\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Class MigrateLocalTasksTest.
+ * Tests the migration local tasks deriver.
  */
 #[Group('stanford_migrate')]
 class MigrateLocalTasksTest extends UnitTestCase {

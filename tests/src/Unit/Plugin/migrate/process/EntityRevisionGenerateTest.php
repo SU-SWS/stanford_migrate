@@ -20,7 +20,7 @@ use Drupal\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Class EntityRevisionGenerateTest.
+ * Tests the entity revision generate process plugin.
  */
 #[Group('stanford_migrate')]
 class EntityRevisionGenerateTest extends UnitTestCase {

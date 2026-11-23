@@ -14,12 +14,16 @@ use Drupal\migrate\Row;
 use Drupal\migrate_plus\Entity\Migration;
 use Drupal\migrate_plus\Entity\MigrationInterface as MigrationEntityInterface;
 
+/**
+ * Migrate plugin, row and migration entity hook implementations.
+ */
 class StanfordMigrateMigrationHooks {
 
   /**
-   * Migration hooks constructor
+   * Migration hooks constructor.
    *
    * @param \Drupal\Core\State\StateInterface $state
+   *   State service.
    */
   public function __construct(protected StateInterface $state) {}
 
@@ -58,16 +62,17 @@ class StanfordMigrateMigrationHooks {
    */
   #[Hook('migrate_prepare_row')]
   public function migratePrepareRow(Row $row, MigrateSourceInterface $source, MigrationInterface $migration) {
-    // Oauth2 authentication adds a token query parameter into the data urls that changes frequently. Since it
-    // changes, the hash of the row  changes without any data actually changing. Fix the row data so that it doesn't
+    // Oauth2 authentication adds a token query parameter into the data urls
+    // that changes frequently. Since it changes, the hash of the row changes
+    // without any data actually changing. Fix the row data so that it doesn't
     // contain those tokens.
     $authentication = $row->getSourceProperty('authentication/plugin');
     $current_url = $row->getSourceProperty('current_feed_url');
     if ($current_url && $authentication == 'oauth2') {
       $row->setSourceProperty('current_feed_url', preg_replace('/access_token=.*?&/', '', $current_url));
     }
-    // In case the list of urls changes dynamically, lets just remove it from the source data to avoid unnecessary hash
-    // changes.
+    // In case the list of urls changes dynamically, lets just remove it from
+    // the source data to avoid unnecessary hash changes.
     $row->setSourceProperty('urls', []);
   }
 
